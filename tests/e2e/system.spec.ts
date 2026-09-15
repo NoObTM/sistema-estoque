@@ -19,7 +19,7 @@ async function chooseOption(page: Page, label: string, option: string) {
 let email: string;
 let password: string;
 
-test('abas por teclado, checkbox persistente e calendário em português', async ({
+test('categorias de cadastro, checkbox persistente e calendário em português', async ({
   page,
 }, testInfo) => {
   const suffix = randomUUID().slice(0, 8);
@@ -31,13 +31,32 @@ test('abas por teclado, checkbox persistente e calendário em português', async
     .getByRole('link', { name: 'Cadastros', exact: true })
     .first()
     .click();
-  const firstTab = page.getByRole('tab', { name: 'Obras e depósitos' });
-  await firstTab.focus();
-  await firstTab.press('ArrowRight');
   await expect(
-    page.getByRole('tab', { name: 'Grupos', exact: true }),
-  ).toHaveAttribute('aria-selected', 'true');
-  await page.getByRole('button', { name: 'Novo cadastro' }).click();
+    page.getByRole('heading', { name: 'O que você deseja cadastrar?' }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: `artifacts/catalog-categories-${testInfo.project.name}.png`,
+    fullPage: true,
+  });
+  const groupsLink = page.getByRole('link', {
+    name: 'Abrir Grupos de materiais',
+  });
+  await groupsLink.focus();
+  await groupsLink.press('Enter');
+  await expect(page).toHaveURL(/tipo=GROUP/);
+  await page.reload();
+  await expect(
+    page.getByRole('heading', { name: 'Grupos de materiais', exact: true }),
+  ).toBeVisible();
+  await page.getByRole('link', { name: 'Todas as categorias' }).click();
+  await page.goBack();
+  await expect(
+    page.getByRole('heading', { name: 'Grupos de materiais', exact: true }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Novo grupo' }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Novo grupo', exact: true }),
+  ).toBeVisible();
   await page.getByLabel('Código', { exact: true }).fill(`UI-${suffix}`);
   await page
     .getByLabel('Nome', { exact: true })
@@ -252,8 +271,9 @@ test('login, cadastro persistente e movimentação real pelo navegador', async (
     .getByRole('link', { name: 'Cadastros', exact: true })
     .first()
     .click();
+  await page.getByRole('link', { name: 'Abrir Obras e depósitos' }).click();
   await page
-    .getByRole('button', { name: 'Novo cadastro', exact: true })
+    .getByRole('button', { name: 'Nova obra ou depósito', exact: true })
     .click();
   await page.getByLabel('Código', { exact: true }).fill(`OB-${suffix}`);
   await page.getByLabel('Nome', { exact: true }).fill(`Obra ${suffix}`);
@@ -262,9 +282,21 @@ test('login, cadastro persistente e movimentação real pelo navegador', async (
     page.getByRole('cell', { name: `Obra ${suffix}`, exact: true }),
   ).toBeVisible();
   for (const tab of ['Grupos', 'Unidades']) {
-    await page.getByRole('tab', { name: tab, exact: true }).click();
+    await page.getByRole('link', { name: 'Todas as categorias' }).click();
     await page
-      .getByRole('button', { name: 'Novo cadastro', exact: true })
+      .getByRole('link', {
+        name:
+          tab === 'Grupos'
+            ? 'Abrir Grupos de materiais'
+            : 'Abrir Unidades de medida',
+        exact: true,
+      })
+      .click();
+    await page
+      .getByRole('button', {
+        name: tab === 'Grupos' ? 'Novo grupo' : 'Nova unidade',
+        exact: true,
+      })
       .click();
     await page.getByLabel('Código', { exact: true }).fill(`${tab}-${suffix}`);
     await page.getByLabel('Nome', { exact: true }).fill(`${tab} ${suffix}`);

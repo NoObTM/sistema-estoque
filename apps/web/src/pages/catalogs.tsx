@@ -3,7 +3,9 @@ import { FormSelect } from '@/components/form-select';
 import { Button } from '@/components/ui/button';
 import { FormCheckbox } from '@/components/form-checkbox';
 import { FieldError } from '@/components/ui/field';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Link, useSearchParams } from 'react-router';
+import { ArrowLeft, ArrowRight, Package } from 'lucide-react';
+import { catalogCategories, type CatalogCategory } from './catalog-categories';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import {
@@ -30,24 +32,19 @@ interface FormField {
   type?: string;
   required?: boolean;
 }
-const catalogLabels: Record<string, string> = {
-  GROUP: 'Grupos',
-  UNIT: 'Unidades',
-  SUPPLIER: 'Fornecedores',
-  EMPLOYEE: 'Funcionários',
-  COST_CENTER: 'Centros de custo',
-};
 
 function Editor({
   path,
   initial,
   fields,
   onClose,
+  title,
 }: {
   path: string;
   initial: Values;
   fields: FormField[];
   onClose: () => void;
+  title?: string;
 }) {
   const { register, handleSubmit, setValue, control } = useForm<Values>({
     defaultValues: initial,
@@ -58,7 +55,7 @@ function Editor({
     <Card asChild className="block gap-0">
       <section className="panel">
         <div className="section-heading">
-          <h2>{initial.id ? 'Editar cadastro' : 'Novo cadastro'}</h2>
+          <h2>{title ?? (initial.id ? 'Editar cadastro' : 'Novo cadastro')}</h2>
           <Button variant="outline" onClick={onClose}>
             Fechar
           </Button>
@@ -147,16 +144,91 @@ function Editor({
   );
 }
 
-export function CatalogsPage({
-  actor,
-  locations,
-  catalogs,
-}: {
+interface CatalogsProps {
   actor: Actor;
   locations: Location[];
   catalogs: Catalog[];
-}) {
-  const [tab, setTab] = useState('LOCATION');
+}
+
+export function CatalogsPage(props: CatalogsProps) {
+  const [params] = useSearchParams();
+  const selected = catalogCategories.find(
+    (category) => category.id === params.get('tipo'),
+  );
+  if (selected)
+    return <CatalogList key={selected.id} {...props} category={selected} />;
+  return (
+    <>
+      <PageHeading
+        eyebrow="ORGANIZAÇÃO"
+        title="O que você deseja cadastrar?"
+        description="Escolha uma categoria para consultar, incluir ou atualizar os registros."
+      />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {catalogCategories.map((category) => {
+          const Icon = category.icon;
+          const count =
+            category.id === 'LOCATION'
+              ? props.locations.length
+              : props.catalogs.filter((entry) => entry.kind === category.id)
+                  .length;
+          return (
+            <Card key={category.id} className="gap-4 border-border p-6">
+              <div className="flex items-center justify-between gap-3">
+                <span className="rounded-xl bg-accent/30 p-3 text-primary">
+                  <Icon aria-hidden="true" size={24} />
+                </span>
+                <Badge>{count} registros</Badge>
+              </div>
+              <h2>{category.title}</h2>
+              <p className="text-sm text-muted-foreground">
+                {category.description}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {category.example}
+              </p>
+              <Button
+                asChild
+                variant="outline"
+                className="mt-auto w-full justify-between"
+              >
+                <Link
+                  to={`?tipo=${category.id}`}
+                  aria-label={`Abrir ${category.title}`}
+                >
+                  Acessar <ArrowRight aria-hidden="true" />
+                </Link>
+              </Button>
+            </Card>
+          );
+        })}
+      </div>
+      <Card className="mt-5 flex-col items-start gap-4 border-border bg-muted p-5 sm:flex-row sm:items-center">
+        <Package aria-hidden="true" className="text-primary" />
+        <div className="min-w-0 flex-1">
+          <h2>Cadastro de materiais</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Para cadastrar cimento, ferramentas e outros itens, acesse
+            Materiais. Tenha um grupo e uma unidade de medida cadastrados.
+          </p>
+        </div>
+        <Button asChild variant="highlight" className="w-full sm:w-auto">
+          <Link to="/materiais">
+            Ir para materiais <ArrowRight />
+          </Link>
+        </Button>
+      </Card>
+    </>
+  );
+}
+
+function CatalogList({
+  actor,
+  locations,
+  catalogs,
+  category,
+}: CatalogsProps & { category: CatalogCategory }) {
+  const tab = category.id;
   const [editing, setEditing] = useState<Values | null>(null);
   const [search, setSearch] = useState('');
   const canEdit = actor.role === 'ADMIN';
@@ -227,103 +299,89 @@ export function CatalogsPage({
   }
   return (
     <>
+      <Button asChild variant="link" className="mb-4 px-0">
+        <Link to="/cadastros">
+          <ArrowLeft /> Todas as categorias
+        </Link>
+      </Button>
       <PageHeading
         eyebrow="ORGANIZAÇÃO"
-        title="Cadastros"
-        description="Organize as obras, as pessoas e as classificações dos materiais."
+        title={category.title}
+        description={category.description}
+        action={
+          canEdit &&
+          !editing && (
+            <Button variant="highlight" onClick={() => openEditor()}>
+              {category.createLabel}
+            </Button>
+          )
+        }
       />
-      <Tabs
-        value={tab}
-        onValueChange={(value) => {
-          setTab(value);
-          setEditing(null);
-        }}
-      >
-        <TabsList className="section-tabs w-full justify-start overflow-x-auto">
-          {[
-            ['LOCATION', 'Obras e depósitos'],
-            ...Object.entries(catalogLabels),
-          ].map(([key, label]) => (
-            <TabsTrigger
-              className="shrink-0 flex-none data-[state=active]:bg-primary data-[state=active]:text-white"
-              key={key}
-              value={key!}
-            >
-              {label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        <TabsContent value={tab}>
-          {editing && (
-            <Editor
-              key={`${tab}-${editing.id ?? 'new'}`}
-              path={tab === 'LOCATION' ? '/locations' : '/catalogs'}
-              initial={editing}
-              fields={fields}
-              onClose={() => setEditing(null)}
+      {editing && (
+        <Editor
+          key={`${tab}-${editing.id ?? 'new'}`}
+          path={tab === 'LOCATION' ? '/locations' : '/catalogs'}
+          initial={editing}
+          fields={fields}
+          title={editing.id ? category.editLabel : category.createLabel}
+          onClose={() => setEditing(null)}
+        />
+      )}
+      <Card asChild className="block gap-0">
+        <section className="panel">
+          <div className="section-heading">
+            <Input
+              aria-label="Buscar cadastro"
+              placeholder="Buscar por código ou nome"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
+          </div>
+          <div className="table-scroll">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Código</TableHead>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Situação</TableHead>
+                  <TableHead>Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {entries.map((entry) => (
+                  <TableRow key={entry.id}>
+                    <TableCell>{entry.code}</TableCell>
+                    <TableCell>{entry.name}</TableCell>
+                    <TableCell>
+                      <Badge tone={entry.active ? 'success' : 'neutral'}>
+                        {entry.active ? 'Ativo' : 'Inativo'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {canEdit && (
+                        <Button
+                          variant="link"
+                          className="mt-4 px-0"
+                          onClick={() => openEditor(entry)}
+                        >
+                          Editar
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          {!entries.length && (
+            <EmptyState>
+              {search
+                ? 'Nenhum resultado para esta busca.'
+                : `Ainda não há registros em ${category.title.toLowerCase()}.`}
+            </EmptyState>
           )}
-          <Card asChild className="block gap-0">
-            <section className="panel">
-              <div className="section-heading">
-                <Input
-                  aria-label="Buscar cadastro"
-                  placeholder="Buscar por código ou nome"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-                {canEdit && (
-                  <Button variant="highlight" onClick={() => openEditor()}>
-                    Novo cadastro
-                  </Button>
-                )}
-              </div>
-              <div className="table-scroll">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Código</TableHead>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Situação</TableHead>
-                      <TableHead>Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {entries.map((entry) => (
-                      <TableRow key={entry.id}>
-                        <TableCell>{entry.code}</TableCell>
-                        <TableCell>{entry.name}</TableCell>
-                        <TableCell>
-                          <Badge tone={entry.active ? 'success' : 'neutral'}>
-                            {entry.active ? 'Ativo' : 'Inativo'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {canEdit && (
-                            <Button
-                              variant="link"
-                              className="mt-4 px-0"
-                              onClick={() => openEditor(entry)}
-                            >
-                              Editar
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-              {!entries.length && (
-                <EmptyState>
-                  Nenhum cadastro encontrado. Comece cadastrando seus locais,
-                  grupos e unidades.
-                </EmptyState>
-              )}
-            </section>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </section>
+      </Card>
     </>
   );
 }
