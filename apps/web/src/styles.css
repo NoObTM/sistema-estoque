@@ -14,6 +14,8 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-orange: var(--orange);
+  --color-orange-foreground: var(--orange-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -24,6 +26,87 @@
 }
 
 @layer components {
+  .app-shell .sidebar {
+    background: linear-gradient(165deg, #004d61 25%, #176e80 100%);
+  }
+  .brand-mark {
+    box-shadow: inset 0 -3px var(--orange);
+  }
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--orange);
+    flex-shrink: 0;
+  }
+  .metric.metric-primary {
+    --metric-color: #004d61;
+    --metric-soft: #e5f2f5;
+  }
+  .metric.metric-aqua {
+    --metric-color: #218189;
+    --metric-soft: #dcf7f8;
+  }
+  .metric.metric-orange {
+    --metric-color: #b4371c;
+    --metric-soft: #fff0e9;
+    border-top-color: var(--orange);
+  }
+  .metric.metric-secondary {
+    --metric-color: #348498;
+    --metric-soft: #e9f4f7;
+  }
+  .metrics .metric {
+    border-top: 3px solid var(--metric-color);
+    background: linear-gradient(135deg, white 35%, var(--metric-soft));
+    box-shadow: 0 4px 18px #004d6108;
+  }
+  .metrics .metric-orange {
+    border-top-color: var(--orange);
+  }
+  .metric .metric-icon {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    flex-shrink: 0;
+    background: var(--metric-soft);
+  }
+  .metric .metric-icon svg,
+  .metrics .metric > strong {
+    color: var(--metric-color);
+  }
+  .replenishment-panel .section-heading h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--orange);
+    flex-shrink: 0;
+  }
+  .panel.operation-start {
+    border-color: #b8e4e8;
+    background: linear-gradient(120deg, #e3f7f7, #f1f8fa 65%, #fff0e9);
+  }
+  .operation-icon {
+    color: var(--secondary);
+    margin-bottom: 14px;
+  }
+  .auth-intro h1 {
+    border-left: 4px solid var(--orange);
+    padding-left: 20px;
+  }
   .field {
     display: flex;
     flex-direction: column;
@@ -299,6 +382,7 @@
     --secondary: #348498;
     --accent: #5bd1d7;
     --orange: #ff502f;
+    --orange-foreground: #28120b;
     --border: #e3eaed;
   }
   * {

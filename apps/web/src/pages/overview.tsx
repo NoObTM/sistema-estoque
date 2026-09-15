@@ -13,6 +13,14 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { Link } from 'react-router';
+import {
+  ArrowRight,
+  Boxes,
+  CircleDollarSign,
+  Package,
+  TriangleAlert,
+  Truck,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toMilliunits } from '@estoque/contracts';
@@ -62,9 +70,11 @@ export function OverviewPage({
           Acompanhe o estoque autorizado e solicite os itens necessários para a
           obra.
         </p>
-        <Link className="button form-submit" to="/requisicoes">
-          Abrir requisições
-        </Link>
+        <Button asChild variant="highlight" className="form-submit">
+          <Link to="/requisicoes">
+            Abrir requisições <ArrowRight />
+          </Link>
+        </Button>
       </section>
     );
   if (query.isPending) return <Loading />;
@@ -80,27 +90,57 @@ export function OverviewPage({
         title="Cada material, no lugar certo."
         description="Saldos e prioridades atualizados a partir das movimentações confirmadas."
         action={
-          <Link className="button" to="/transferencias">
-            Ver transferências
-          </Link>
+          <Button asChild variant="highlight">
+            <Link to="/transferencias">
+              <Truck /> Ver transferências
+            </Link>
+          </Button>
         }
       />
       <div className="metrics">
         {[
-          ['Valor em estoque', money(report.totalValue)],
-          ['Materiais em estoque', report.materialCount],
-          ['Abaixo do mínimo', report.lowCount],
-          ['Transferências pendentes', report.pendingCount],
-        ].map(([label, value]) => (
-          <article className="metric" key={label}>
-            <div className="metric-label">{label}</div>
+          {
+            label: 'Valor em estoque',
+            value: money(report.totalValue),
+            icon: CircleDollarSign,
+            tone: 'primary',
+          },
+          {
+            label: 'Materiais em estoque',
+            value: report.materialCount,
+            icon: Package,
+            tone: 'aqua',
+          },
+          {
+            label: 'Abaixo do mínimo',
+            value: report.lowCount,
+            icon: TriangleAlert,
+            tone: 'orange',
+          },
+          {
+            label: 'Transferências pendentes',
+            value: report.pendingCount,
+            icon: Truck,
+            tone: 'secondary',
+          },
+        ].map(({ label, value, icon: Icon, tone }) => (
+          <article className={`metric metric-${tone}`} key={label}>
+            <div className="metric-label">
+              {label}
+              <span className="metric-icon">
+                <Icon size={20} aria-hidden="true" />
+              </span>
+            </div>
             <strong className="metric-value">{value}</strong>
           </article>
         ))}
       </div>
-      <section className="panel">
+      <section className="panel replenishment-panel">
         <div className="section-heading">
-          <h2>Reposição de materiais</h2>
+          <h2>
+            <span className="section-dot" />
+            Reposição de materiais
+          </h2>
           <Link className="text-link" to="/estoque">
             Consultar saldos
           </Link>
@@ -126,22 +166,25 @@ export function OverviewPage({
           </EmptyState>
         )}
       </section>
-      <section className="panel">
+      <section className="panel operation-start">
+        <Boxes className="operation-icon" size={32} aria-hidden="true" />
         <h2>Comece pela organização da operação</h2>
         <p className="document-notes">
           Cadastre obras, grupos e unidades. Depois inclua os materiais e
           registre os saldos iniciais ou entradas.
         </p>
         <div className="actions-row">
-          <Link className="button secondary" to="/cadastros">
-            Cadastros
-          </Link>
-          <Link className="button secondary" to="/materiais">
-            Materiais
-          </Link>
-          <Link className="button" to="/movimentacoes">
-            Entradas e saídas
-          </Link>
+          <Button asChild variant="outline">
+            <Link to="/cadastros">Cadastros</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/materiais">Materiais</Link>
+          </Button>
+          <Button asChild variant="highlight">
+            <Link to="/movimentacoes">
+              Entradas e saídas <ArrowRight />
+            </Link>
+          </Button>
         </div>
       </section>
     </>

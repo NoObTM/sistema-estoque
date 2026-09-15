@@ -141,7 +141,7 @@ export function AuthPage({
           )}
           <FormError error={error} />
           {message && <p role="status">{message}</p>}
-          <Button disabled={isSubmitting}>
+          <Button variant="highlight" disabled={isSubmitting}>
             {isSubmitting
               ? 'Aguarde…'
               : setup

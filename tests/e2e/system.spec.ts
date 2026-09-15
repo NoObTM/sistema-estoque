@@ -47,6 +47,9 @@ test('transferência com conferência parcial e bloqueio de excesso pela interfa
   await expect(
     page.getByRole('heading', { name: 'Cada material, no lugar certo.' }),
   ).toBeVisible();
+  await page.screenshot({
+    path: `artifacts/dashboard-${testInfo.project.name}.png`,
+  });
   async function post(path: string, data: unknown) {
     const response = await page.request.post(`/api${path}`, {
       headers: { Origin: env.APP_URL, 'Idempotency-Key': randomUUID() },

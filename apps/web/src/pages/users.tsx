@@ -64,7 +64,11 @@ export function UsersPage({ locations }: { locations: Location[] }) {
         eyebrow="ADMINISTRAÇÃO"
         title="Usuários e auditoria"
         description="Convide a equipe e controle o acesso às obras."
-        action={<Button onClick={() => edit('new')}>Convidar usuário</Button>}
+        action={
+          <Button variant="highlight" onClick={() => edit('new')}>
+            Convidar usuário
+          </Button>
+        }
       />
       {editing && (
         <section className="panel">

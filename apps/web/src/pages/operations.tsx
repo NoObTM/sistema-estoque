@@ -543,7 +543,9 @@ export function OperationsPage(props: Props) {
         description="Documentos persistentes com confirmação, responsáveis e histórico."
         action={
           canCreate && (
-            <Button onClick={() => setEditing('new')}>Novo documento</Button>
+            <Button variant="highlight" onClick={() => setEditing('new')}>
+              Novo documento
+            </Button>
           )
         }
       />

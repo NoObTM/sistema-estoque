@@ -266,7 +266,9 @@ export function CatalogsPage({
             onChange={(e) => setSearch(e.target.value)}
           />
           {canEdit && (
-            <Button onClick={() => openEditor()}>Novo cadastro</Button>
+            <Button variant="highlight" onClick={() => openEditor()}>
+              Novo cadastro
+            </Button>
           )}
         </div>
         <div className="table-scroll">
@@ -367,6 +369,7 @@ export function MaterialsPage({
         action={
           actor.role === 'ADMIN' && (
             <Button
+              variant="highlight"
               onClick={() =>
                 setEditing({
                   code: '',
