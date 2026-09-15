@@ -4,3 +4,5 @@ package-lock.json
 artifacts
 .tools
 plano-sistema-estoque-construtora.md
+**/*.md
+**/*.pdf

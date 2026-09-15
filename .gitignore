@@ -10,3 +10,5 @@ playwright-report/
 test-results/
 .tools/
 artifacts/
+*.[mM][dD]
+*.[pP][dD][fF]
