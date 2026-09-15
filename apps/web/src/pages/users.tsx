@@ -1,3 +1,17 @@
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from '@/components/ui/native-select';
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from '@/components/ui/table';
 import { useState } from 'react';
 import { roles } from '@estoque/contracts/schemas';
 import { PageHeading, Badge } from '../components/ui';
@@ -50,11 +64,7 @@ export function UsersPage({ locations }: { locations: Location[] }) {
         eyebrow="ADMINISTRAÇÃO"
         title="Usuários e auditoria"
         description="Convide a equipe e controle o acesso às obras."
-        action={
-          <button className="button" onClick={() => edit('new')}>
-            Convidar usuário
-          </button>
-        }
+        action={<Button onClick={() => edit('new')}>Convidar usuário</Button>}
       />
       {editing && (
         <section className="panel">
@@ -81,7 +91,7 @@ export function UsersPage({ locations }: { locations: Location[] }) {
               {editing === 'new' && (
                 <>
                   <Field label="Nome">
-                    <input
+                    <Input
                       required
                       minLength={2}
                       value={name}
@@ -89,7 +99,7 @@ export function UsersPage({ locations }: { locations: Location[] }) {
                     />
                   </Field>
                   <Field label="E-mail">
-                    <input
+                    <Input
                       required
                       type="email"
                       value={email}
@@ -99,13 +109,16 @@ export function UsersPage({ locations }: { locations: Location[] }) {
                 </>
               )}
               <Field label="Perfil">
-                <select value={role} onChange={(e) => setRole(e.target.value)}>
+                <NativeSelect
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                >
                   {roles.map((r) => (
-                    <option value={r} key={r}>
+                    <NativeSelectOption value={r} key={r}>
                       {roleLabels[r]}
-                    </option>
+                    </NativeSelectOption>
                   ))}
-                </select>
+                </NativeSelect>
               </Field>
               {editing !== 'new' && (
                 <Field label="Acesso ativo">
@@ -143,7 +156,7 @@ export function UsersPage({ locations }: { locations: Location[] }) {
                   Convite criado, válido por 48 horas. Compartilhe este link com
                   o destinatário:
                 </p>
-                <input
+                <Input
                   aria-label="Link do convite"
                   readOnly
                   value={invitation}
@@ -151,41 +164,41 @@ export function UsersPage({ locations }: { locations: Location[] }) {
               </div>
             )}
             <div className="actions-row">
-              <button className="button" disabled={mutation.isPending}>
+              <Button disabled={mutation.isPending}>
                 {editing === 'new' ? 'Gerar convite' : 'Salvar acesso'}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                className="button secondary"
+                variant="outline"
                 onClick={() => setEditing(null)}
               >
                 Fechar
-              </button>
+              </Button>
             </div>
           </form>
         </section>
       )}
       <section className="panel">
         <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Usuário</th>
-                <th>Perfil</th>
-                <th>Obras</th>
-                <th>Situação</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Usuário</TableHead>
+                <TableHead>Perfil</TableHead>
+                <TableHead>Obras</TableHead>
+                <TableHead>Situação</TableHead>
+                <TableHead>Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {users.data.map((user) => (
-                <tr key={user.id}>
-                  <td>
+                <TableRow key={user.id}>
+                  <TableCell>
                     <strong>{user.name}</strong>
                     <small>{user.email}</small>
-                  </td>
-                  <td>{roleLabels[user.role]}</td>
-                  <td>
+                  </TableCell>
+                  <TableCell>{roleLabels[user.role]}</TableCell>
+                  <TableCell>
                     {user.role === 'ADMIN'
                       ? 'Todas'
                       : user.memberships
@@ -195,45 +208,49 @@ export function UsersPage({ locations }: { locations: Location[] }) {
                                 ?.name,
                           )
                           .join(', ')}
-                  </td>
-                  <td>
+                  </TableCell>
+                  <TableCell>
                     <Badge>{user.active ? 'Ativo' : 'Inativo'}</Badge>
-                  </td>
-                  <td>
-                    <button className="text-link" onClick={() => edit(user)}>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="link"
+                      className="mt-4 px-0"
+                      onClick={() => edit(user)}
+                    >
                       Editar acesso
-                    </button>
-                  </td>
-                </tr>
+                    </Button>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </section>
       <section className="panel">
         <h2>Últimas 200 operações auditadas</h2>
         <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Responsável</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Data</TableHead>
+                <TableHead>Responsável</TableHead>
+                <TableHead>Ação</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {audit.data?.map((entry) => (
-                <tr key={entry.id}>
-                  <td>{dateTime(entry.createdAt)}</td>
-                  <td>
+                <TableRow key={entry.id}>
+                  <TableCell>{dateTime(entry.createdAt)}</TableCell>
+                  <TableCell>
                     {users.data.find((u) => u.id === entry.actorId)?.name ??
                       entry.actorId}
-                  </td>
-                  <td>{entry.action}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell>{entry.action}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </section>
     </>

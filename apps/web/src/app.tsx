@@ -1,3 +1,8 @@
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from '@/components/ui/native-select';
+import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { NavLink, Route, Routes } from 'react-router';
 import {
@@ -137,20 +142,22 @@ function Workspace({ actor }: { actor: Actor }) {
           <label className="location-selector">
             <Building2 size={18} />
             <span className="sr-only">Obra ou depósito</span>
-            <select
+            <NativeSelect
               value={locationId}
               onChange={(e) => setLocationId(e.target.value)}
             >
-              <option value="">Todos os locais autorizados</option>
+              <NativeSelectOption value="">
+                Todos os locais autorizados
+              </NativeSelectOption>
               {locations.data!.map((l) => (
-                <option value={l.id} key={l.id}>
+                <NativeSelectOption value={l.id} key={l.id}>
                   {l.name}
-                </option>
+                </NativeSelectOption>
               ))}
-            </select>
+            </NativeSelect>
           </label>
-          <button
-            className="button secondary"
+          <Button
+            variant="outline"
             onClick={async () => {
               await api('/auth/sign-out', { method: 'POST', body: {} });
               client.clear();
@@ -159,7 +166,7 @@ function Workspace({ actor }: { actor: Actor }) {
           >
             <LogOut size={16} />
             Sair
-          </button>
+          </Button>
         </header>
         <main>
           <Routes>

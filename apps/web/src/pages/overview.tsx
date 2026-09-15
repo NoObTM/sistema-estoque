@@ -1,3 +1,17 @@
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from '@/components/ui/native-select';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from '@/components/ui/table';
 import { Link } from 'react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -175,43 +189,49 @@ function StockSettings({
       >
         <div className="form-grid columns">
           <Field label="Obra">
-            <select required {...register('locationId')} disabled={!!stock}>
-              <option value="">Selecione</option>
+            <NativeSelect
+              required
+              {...register('locationId')}
+              disabled={!!stock}
+            >
+              <NativeSelectOption value="">Selecione</NativeSelectOption>
               {locations.map((l) => (
-                <option value={l.id} key={l.id}>
+                <NativeSelectOption value={l.id} key={l.id}>
                   {l.name}
-                </option>
+                </NativeSelectOption>
               ))}
-            </select>
+            </NativeSelect>
           </Field>
           <Field label="Material">
-            <select required {...register('materialId')} disabled={!!stock}>
-              <option value="">Selecione</option>
+            <NativeSelect
+              required
+              {...register('materialId')}
+              disabled={!!stock}
+            >
+              <NativeSelectOption value="">Selecione</NativeSelectOption>
               {materials.map((m) => (
-                <option value={m.id} key={m.id}>
+                <NativeSelectOption value={m.id} key={m.id}>
                   {m.name}
-                </option>
+                </NativeSelectOption>
               ))}
-            </select>
+            </NativeSelect>
           </Field>
           <Field label="Estoque mínimo">
-            <input required {...register('minimum')} />
+            <Input required {...register('minimum')} />
           </Field>
           <Field label="Estoque ideal">
-            <input required {...register('ideal')} />
+            <Input required {...register('ideal')} />
           </Field>
           <Field label="Localização física">
-            <input {...register('address')} />
+            <Input {...register('address')} />
           </Field>
         </div>
         <MutationStatus mutation={mutation} />
         <div className="actions-row">
-          <button className="button" disabled={mutation.isPending}>
-            Salvar parâmetros
-          </button>
-          <button type="button" className="button secondary" onClick={onClose}>
+          <Button disabled={mutation.isPending}>Salvar parâmetros</Button>
+          <Button type="button" variant="outline" onClick={onClose}>
             Fechar
-          </button>
+          </Button>
         </div>
       </form>
     </section>
@@ -252,9 +272,9 @@ export function StockOverview({
         description="Saldo disponível, custo médio e parâmetros de reposição de cada local."
         action={
           canEdit && (
-            <button className="button" onClick={() => setEditing('new')}>
+            <Button onClick={() => setEditing('new')}>
               Configurar material no local
-            </button>
+            </Button>
           )
         }
       />
@@ -268,7 +288,7 @@ export function StockOverview({
         />
       )}
       <section className="panel">
-        <input
+        <Input
           className="search"
           aria-label="Buscar saldo"
           placeholder="Buscar material"
@@ -276,34 +296,34 @@ export function StockOverview({
           onChange={(e) => setSearch(e.target.value)}
         />
         <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Material / obra</th>
-                <th>Localização</th>
-                <th>Disponível</th>
-                <th>Mínimo / ideal</th>
-                <th>Custo médio</th>
-                <th>Situação</th>
-                {canEdit && <th>Ações</th>}
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Material / obra</TableHead>
+                <TableHead>Localização</TableHead>
+                <TableHead>Disponível</TableHead>
+                <TableHead>Mínimo / ideal</TableHead>
+                <TableHead>Custo médio</TableHead>
+                <TableHead>Situação</TableHead>
+                {canEdit && <TableHead>Ações</TableHead>}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {rows.map((s) => (
-                <tr key={s.id}>
-                  <td>
+                <TableRow key={s.id}>
+                  <TableCell>
                     <strong>{s.material.name}</strong>
                     <small>{s.location.name}</small>
-                  </td>
-                  <td>{s.address || 'A definir'}</td>
-                  <td>
+                  </TableCell>
+                  <TableCell>{s.address || 'A definir'}</TableCell>
+                  <TableCell>
                     {number(s.quantity)} {s.material.unit.code}
-                  </td>
-                  <td>
+                  </TableCell>
+                  <TableCell>
                     {number(s.minimum)} / {number(s.ideal)}
-                  </td>
-                  <td>{money(s.averageCost)}</td>
-                  <td>
+                  </TableCell>
+                  <TableCell>{money(s.averageCost)}</TableCell>
+                  <TableCell>
                     <Badge
                       tone={
                         toMilliunits(s.quantity) < toMilliunits(s.minimum)
@@ -315,21 +335,22 @@ export function StockOverview({
                         ? 'Abaixo do mínimo'
                         : 'Regular'}
                     </Badge>
-                  </td>
+                  </TableCell>
                   {canEdit && (
-                    <td>
-                      <button
-                        className="text-link"
+                    <TableCell>
+                      <Button
+                        variant="link"
+                        className="mt-4 px-0"
                         onClick={() => setEditing(s)}
                       >
                         Configurar
-                      </button>
-                    </td>
+                      </Button>
+                    </TableCell>
                   )}
-                </tr>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
         {!rows.length && (
           <EmptyState>

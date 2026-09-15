@@ -1,3 +1,5 @@
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { api } from '../lib/api';
@@ -99,12 +101,12 @@ export function AuthPage({
         >
           {(setup || invitation) && (
             <Field label="Nome completo">
-              <input required autoComplete="name" {...register('name')} />
+              <Input required autoComplete="name" {...register('name')} />
             </Field>
           )}
           {!reset && (
             <Field label="E-mail">
-              <input
+              <Input
                 required
                 type="email"
                 autoComplete="username"
@@ -114,7 +116,7 @@ export function AuthPage({
           )}
           {!forgot && (
             <Field label="Senha">
-              <input
+              <Input
                 required
                 type="password"
                 minLength={setup || invitation || reset ? 12 : 1}
@@ -129,7 +131,7 @@ export function AuthPage({
           )}
           {setup && (
             <Field label="Chave de instalação">
-              <input
+              <Input
                 required
                 type="password"
                 autoComplete="off"
@@ -139,7 +141,7 @@ export function AuthPage({
           )}
           <FormError error={error} />
           {message && <p role="status">{message}</p>}
-          <button className="button" disabled={isSubmitting}>
+          <Button disabled={isSubmitting}>
             {isSubmitting
               ? 'Aguarde…'
               : setup
@@ -151,18 +153,19 @@ export function AuthPage({
                     : forgot
                       ? 'Enviar instruções'
                       : 'Entrar'}
-          </button>
+          </Button>
         </form>
         {!setup && !invitation && !reset && (
-          <button
-            className="text-link"
+          <Button
+            variant="link"
+            className="mt-4 px-0"
             onClick={() => {
               setForgot(!forgot);
               setMessage('');
             }}
           >
             {forgot ? 'Voltar ao login' : 'Esqueci minha senha'}
-          </button>
+          </Button>
         )}
         {reset && (
           <a className="text-link" href="/">

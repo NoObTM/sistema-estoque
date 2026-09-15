@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Badge as StatusBadge } from './ui/badge';
 
 export function PageHeading({
   eyebrow,
@@ -30,7 +31,11 @@ export function Badge({
   children: ReactNode;
   tone?: 'neutral' | 'warning' | 'success';
 }) {
-  return <span className={`badge ${tone}`}>{children}</span>;
+  return (
+    <StatusBadge variant="outline" className={`badge ${tone}`}>
+      {children}
+    </StatusBadge>
+  );
 }
 
 export function EmptyState({ children }: { children: ReactNode }) {

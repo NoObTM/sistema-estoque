@@ -1,3 +1,13 @@
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from '@/components/ui/table';
 import { useState } from 'react';
 import { PageHeading, EmptyState } from '../components/ui';
 import { Field, Loading, ErrorPanel } from '../components/forms';
@@ -123,28 +133,25 @@ export function ReportsPage({ locationId }: { locationId: string }) {
         description="Consulte os saldos atuais e as movimentações do período nas obras autorizadas."
         action={
           <div className="actions-row">
-            <button className="button secondary" onClick={() => window.print()}>
+            <Button variant="outline" onClick={() => window.print()}>
               Imprimir / PDF
-            </button>
-            <button
-              className="button"
-              onClick={() => downloadCsv(`estoque-${tab}.csv`, rows)}
-            >
+            </Button>
+            <Button onClick={() => downloadCsv(`estoque-${tab}.csv`, rows)}>
               Exportar CSV
-            </button>
+            </Button>
           </div>
         }
       />
       <div className="filters">
         <Field label="De">
-          <input
+          <Input
             type="date"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
           />
         </Field>
         <Field label="Até">
-          <input
+          <Input
             type="date"
             value={to}
             onChange={(e) => setTo(e.target.value)}
@@ -158,13 +165,14 @@ export function ReportsPage({ locationId }: { locationId: string }) {
           ['consumption', 'Consumo por centro de custo'],
           ['ledger', 'Histórico de movimentações'],
         ].map(([id, label]) => (
-          <button
+          <Button
+            variant="ghost"
             key={id}
             className={tab === id ? 'selected' : ''}
             onClick={() => setTab(id!)}
           >
             {label}
-          </button>
+          </Button>
         ))}
       </div>
       <section className="panel">
@@ -180,38 +188,38 @@ export function ReportsPage({ locationId }: { locationId: string }) {
           </h2>
         </div>
         <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
+          <Table>
+            <TableHeader>
+              <TableRow>
                 {rows[0]!.map((label) => (
-                  <th key={label}>{label}</th>
+                  <TableHead key={label}>{label}</TableHead>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {rows.slice(1).map((row, i) => (
-                <tr key={i}>
+                <TableRow key={i}>
                   {row.map((value, j) => (
-                    <td key={j}>
+                    <TableCell key={j}>
                       {typeof value === 'number' ? number(value) : value}
-                    </td>
+                    </TableCell>
                   ))}
-                </tr>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
         {tab === 'ledger' && ledger.hasNextPage && (
           <div className="info-note">
             Há mais registros. Carregue os lançamentos desejados antes de
             exportar ou imprimir.{' '}
-            <button
-              className="button secondary"
+            <Button
+              variant="outline"
               disabled={ledger.isFetchingNextPage}
               onClick={() => void ledger.fetchNextPage()}
             >
               Carregar mais lançamentos
-            </button>
+            </Button>
           </div>
         )}
         {rows.length === 1 && (

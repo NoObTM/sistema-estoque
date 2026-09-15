@@ -1,3 +1,18 @@
+import { Button } from '@/components/ui/button';
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from '@/components/ui/native-select';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from '@/components/ui/table';
 import { useState } from 'react';
 import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -100,9 +115,9 @@ function DocumentEditor({
     <section className="panel">
       <div className="section-heading">
         <h2>{initial ? `Editar #${initial.number}` : 'Novo documento'}</h2>
-        <button className="button secondary" onClick={onClose}>
+        <Button variant="outline" onClick={onClose}>
           Fechar
-        </button>
+        </Button>
       </div>
       <form
         onSubmit={handleSubmit(async (body) => {
@@ -118,82 +133,86 @@ function DocumentEditor({
       >
         <div className="form-grid columns">
           <Field label="Tipo">
-            <select {...register('kind')} disabled={!!initial}>
+            <NativeSelect {...register('kind')} disabled={!!initial}>
               {props.kinds.map((k) => (
-                <option value={k} key={k}>
+                <NativeSelectOption value={k} key={k}>
                   {kindLabels[k]}
-                </option>
+                </NativeSelectOption>
               ))}
-            </select>
+            </NativeSelect>
           </Field>
           <Field label="Obra / origem">
-            <select required {...register('locationId')} disabled={!!initial}>
-              <option value="">Selecione</option>
+            <NativeSelect
+              required
+              {...register('locationId')}
+              disabled={!!initial}
+            >
+              <NativeSelectOption value="">Selecione</NativeSelectOption>
               {props.locations
                 .filter((l) => l.active)
                 .map((l) => (
-                  <option value={l.id} key={l.id}>
+                  <NativeSelectOption value={l.id} key={l.id}>
                     {l.name}
-                  </option>
+                  </NativeSelectOption>
                 ))}
-            </select>
+            </NativeSelect>
           </Field>
           {kind === 'TRANSFER' && (
             <Field label="Destino">
-              <select required {...register('destinationId')}>
-                <option value="">Selecione</option>
+              <NativeSelect required {...register('destinationId')}>
+                <NativeSelectOption value="">Selecione</NativeSelectOption>
                 {props.destinations
                   .filter((l) => l.id !== locationId)
                   .map((l) => (
-                    <option value={l.id} key={l.id}>
+                    <NativeSelectOption value={l.id} key={l.id}>
                       {l.name}
-                    </option>
+                    </NativeSelectOption>
                   ))}
-              </select>
+              </NativeSelect>
             </Field>
           )}
           {kind === 'ENTRY' && (
             <Field label="Fornecedor">
-              <select required {...register('supplierId')}>
-                <option value="">Selecione</option>
+              <NativeSelect required {...register('supplierId')}>
+                <NativeSelectOption value="">Selecione</NativeSelectOption>
                 {applicable('SUPPLIER').map((c) => (
-                  <option value={c.id} key={c.id}>
+                  <NativeSelectOption value={c.id} key={c.id}>
                     {c.name}
-                  </option>
+                  </NativeSelectOption>
                 ))}
-              </select>
+              </NativeSelect>
             </Field>
           )}
           {['EXIT', 'REQUEST'].includes(kind) && (
             <>
               <Field label="Funcionário">
-                <select required {...register('employeeId')}>
-                  <option value="">Selecione</option>
+                <NativeSelect required {...register('employeeId')}>
+                  <NativeSelectOption value="">Selecione</NativeSelectOption>
                   {applicable('EMPLOYEE').map((c) => (
-                    <option value={c.id} key={c.id}>
+                    <NativeSelectOption value={c.id} key={c.id}>
                       {c.name}
-                    </option>
+                    </NativeSelectOption>
                   ))}
-                </select>
+                </NativeSelect>
               </Field>
               <Field label="Centro de custo">
-                <select required {...register('costCenterId')}>
-                  <option value="">Selecione</option>
+                <NativeSelect required {...register('costCenterId')}>
+                  <NativeSelectOption value="">Selecione</NativeSelectOption>
                   {applicable('COST_CENTER').map((c) => (
-                    <option value={c.id} key={c.id}>
+                    <NativeSelectOption value={c.id} key={c.id}>
                       {c.name}
-                    </option>
+                    </NativeSelectOption>
                   ))}
-                </select>
+                </NativeSelect>
               </Field>
             </>
           )}
           <Field label="Documento / referência">
-            <input {...register('reference')} />
+            <Input {...register('reference')} />
           </Field>
           {kind === 'REQUEST' && (
             <Field label="Necessário em">
-              <input
+              <Input
                 type="date"
                 {...register('neededAt', {
                   setValueAs: (value) => value || null,
@@ -202,7 +221,7 @@ function DocumentEditor({
             </Field>
           )}
           <Field label="Observações / justificativa">
-            <textarea {...register('notes')} />
+            <Textarea {...register('notes')} />
           </Field>
         </div>
         <h3 className="form-section-title">
@@ -215,19 +234,19 @@ function DocumentEditor({
         {fields.map((field, index) => (
           <div className="item-editor" key={field.id}>
             <Field label="Material">
-              <select required {...register(`items.${index}.materialId`)}>
-                <option value="">Selecione</option>
+              <NativeSelect required {...register(`items.${index}.materialId`)}>
+                <NativeSelectOption value="">Selecione</NativeSelectOption>
                 {props.materials
                   .filter((m) => m.active)
                   .map((m) => (
-                    <option value={m.id} key={m.id}>
+                    <NativeSelectOption value={m.id} key={m.id}>
                       {m.name} ({m.unit.code})
-                    </option>
+                    </NativeSelectOption>
                   ))}
-              </select>
+              </NativeSelect>
             </Field>
             <Field label={kind === 'INVENTORY' ? 'Contado' : 'Quantidade'}>
-              <input
+              <Input
                 required
                 inputMode="decimal"
                 {...register(`items.${index}.quantity`)}
@@ -235,32 +254,33 @@ function DocumentEditor({
             </Field>
             {['ENTRY', 'INITIAL'].includes(kind) && (
               <Field label="Custo unitário (R$)">
-                <input
+                <Input
                   required
                   inputMode="decimal"
                   {...register(`items.${index}.unitCost`)}
                 />
               </Field>
             )}
-            <button
+            <Button
               type="button"
-              className="button secondary"
+              variant="outline"
               disabled={fields.length === 1}
               onClick={() => remove(index)}
             >
               Remover item
-            </button>
+            </Button>
           </div>
         ))}
-        <button
+        <Button
           type="button"
-          className="text-link"
+          variant="link"
+          className="mt-4 px-0"
           onClick={() =>
             append({ materialId: '', quantity: '1', unitCost: '0' })
           }
         >
           + Adicionar material
-        </button>
+        </Button>
         {Object.keys(errors).length > 0 && (
           <p role="alert" className="form-error">
             Revise os campos obrigatórios, a justificativa e as quantidades.
@@ -268,9 +288,9 @@ function DocumentEditor({
           </p>
         )}
         <MutationStatus mutation={mutation} />
-        <button className="button form-submit" disabled={mutation.isPending}>
+        <Button className="form-submit" disabled={mutation.isPending}>
           Salvar rascunho
-        </button>
+        </Button>
       </form>
     </section>
   );
@@ -316,45 +336,35 @@ function DocumentActions({
     <div className="document-actions">
       {doc.status === 'DRAFT' && draftAccess && (
         <div className="actions-row">
-          <button className="button secondary" onClick={onEdit}>
+          <Button variant="outline" onClick={onEdit}>
             Editar
-          </button>
-          <button
-            className="button"
+          </Button>
+          <Button
             disabled={mutation.isPending}
             onClick={() => setAction('confirm')}
           >
             Confirmar {doc.kind === 'TRANSFER' ? 'envio' : 'documento'}
-          </button>
-          <button
-            className="button secondary"
-            onClick={() => setAction('cancel')}
-          >
+          </Button>
+          <Button variant="outline" onClick={() => setAction('cancel')}>
             Cancelar rascunho
-          </button>
+          </Button>
         </div>
       )}
       {doc.kind === 'TRANSFER' && ['SENT', 'PARTIAL'].includes(doc.status) && (
         <div className="actions-row">
           {operator && hasAccess(doc.destinationId) && (
-            <button className="button" onClick={() => setAction('RECEIVE')}>
+            <Button onClick={() => setAction('RECEIVE')}>
               Conferir recebimento
-            </button>
+            </Button>
           )}
           {manager && hasAccess(doc.locationId) && (
             <>
-              <button
-                className="button secondary"
-                onClick={() => setAction('RETURN')}
-              >
+              <Button variant="outline" onClick={() => setAction('RETURN')}>
                 Registrar devolução
-              </button>
-              <button
-                className="button secondary"
-                onClick={() => setAction('LOSS')}
-              >
+              </Button>
+              <Button variant="outline" onClick={() => setAction('LOSS')}>
                 Registrar perda
-              </button>
+              </Button>
             </>
           )}
         </div>
@@ -363,18 +373,22 @@ function DocumentActions({
         ['PENDING', 'PARTIAL'].includes(doc.status) &&
         operator &&
         hasAccess(doc.locationId) && (
-          <button className="button" onClick={() => setAction('FULFILL')}>
+          <Button onClick={() => setAction('FULFILL')}>
             Atender requisição
-          </button>
+          </Button>
         )}
       {manager &&
         hasAccess(doc.locationId) &&
         doc.status === 'CONFIRMED' &&
         ['ENTRY', 'EXIT', 'INITIAL', 'INVENTORY'].includes(doc.kind) &&
         !doc.corrections?.some((c) => c.kind === 'REVERSAL') && (
-          <button className="text-link" onClick={() => setAction('reverse')}>
+          <Button
+            variant="link"
+            className="mt-4 px-0"
+            onClick={() => setAction('reverse')}
+          >
             Estornar movimentação
-          </button>
+          </Button>
         )}
       {action && (
         <form
@@ -420,7 +434,7 @@ function DocumentActions({
                   key={item.id}
                   label={`${item.material.name} · Pendente: ${number(pendingQuantity(item))} ${item.material.unit.code}`}
                 >
-                  <input
+                  <Input
                     aria-label={`Quantidade ${item.material.name}`}
                     inputMode="decimal"
                     value={quantities[item.materialId] ?? ''}
@@ -435,7 +449,7 @@ function DocumentActions({
               ))}
           {!['confirm', 'cancel'].includes(action) && (
             <Field label="Justificativa / conferência">
-              <textarea
+              <Textarea
                 required
                 minLength={5}
                 value={notes}
@@ -444,23 +458,23 @@ function DocumentActions({
             </Field>
           )}
           <div className="actions-row">
-            <button className="button" disabled={mutation.isPending}>
+            <Button disabled={mutation.isPending}>
               {mutation.isPending ? 'Gravando…' : 'Concluir operação'}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="button secondary"
+              variant="outline"
               onClick={() => setAction('')}
             >
               Voltar
-            </button>
+            </Button>
           </div>
         </form>
       )}
       <MutationStatus mutation={mutation} />
       {action && !['confirm', 'cancel', 'reverse'].includes(action) && (
         <Field label="Comprovante (PNG, JPEG, WebP ou PDF, até 1 MB)">
-          <input
+          <Input
             type="file"
             accept="image/png,image/jpeg,image/webp,application/pdf"
             onChange={(event) => {
@@ -529,9 +543,7 @@ export function OperationsPage(props: Props) {
         description="Documentos persistentes com confirmação, responsáveis e histórico."
         action={
           canCreate && (
-            <button className="button" onClick={() => setEditing('new')}>
-              Novo documento
-            </button>
+            <Button onClick={() => setEditing('new')}>Novo documento</Button>
           )
         }
       />
@@ -545,14 +557,17 @@ export function OperationsPage(props: Props) {
       )}
       <div className="filters">
         <Field label="Situação">
-          <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-            <option value="">Todas</option>
+          <NativeSelect
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          >
+            <NativeSelectOption value="">Todas</NativeSelectOption>
             {Object.entries(statusLabels).map(([key, label]) => (
-              <option key={key} value={key}>
+              <NativeSelectOption key={key} value={key}>
                 {label}
-              </option>
+              </NativeSelectOption>
             ))}
-          </select>
+          </NativeSelect>
         </Field>
         <span className="muted">{entries.length} documentos carregados</span>
       </div>
@@ -565,13 +580,13 @@ export function OperationsPage(props: Props) {
         </section>
       )}
       {documents.hasNextPage && (
-        <button
-          className="button secondary"
+        <Button
+          variant="outline"
           disabled={documents.isFetchingNextPage}
           onClick={() => void documents.fetchNextPage()}
         >
           Carregar mais documentos
-        </button>
+        </Button>
       )}
       {entries.map((doc) => (
         <section className="panel" key={doc.id}>
@@ -597,40 +612,40 @@ export function OperationsPage(props: Props) {
           </div>
           {doc.notes && <p className="document-notes">{doc.notes}</p>}
           <div className="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Material</th>
-                  <th>Quantidade</th>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Material</TableHead>
+                  <TableHead>Quantidade</TableHead>
                   {['TRANSFER', 'REQUEST'].includes(doc.kind) && (
                     <>
-                      <th>Recebido / atendido</th>
-                      <th>Devolvido / perdido</th>
-                      <th>Pendente</th>
+                      <TableHead>Recebido / atendido</TableHead>
+                      <TableHead>Devolvido / perdido</TableHead>
+                      <TableHead>Pendente</TableHead>
                     </>
                   )}
-                </tr>
-              </thead>
-              <tbody>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {doc.items.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.material.name}</td>
-                    <td>
+                  <TableRow key={item.id}>
+                    <TableCell>{item.material.name}</TableCell>
+                    <TableCell>
                       {number(item.quantity)} {item.material.unit.code}
-                    </td>
+                    </TableCell>
                     {['TRANSFER', 'REQUEST'].includes(doc.kind) && (
                       <>
-                        <td>{number(item.completed)}</td>
-                        <td>
+                        <TableCell>{number(item.completed)}</TableCell>
+                        <TableCell>
                           {number(item.returned)} / {number(item.lost)}
-                        </td>
-                        <td>{number(pendingQuantity(item))}</td>
+                        </TableCell>
+                        <TableCell>{number(pendingQuantity(item))}</TableCell>
                       </>
                     )}
-                  </tr>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
           {doc.corrections?.some((c) => c.kind === 'REVERSAL') && (
             <p className="form-error">

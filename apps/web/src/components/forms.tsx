@@ -7,6 +7,12 @@ import {
   type ReactNode,
 } from 'react';
 import type { UseMutationResult } from '@tanstack/react-query';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
+import { NativeSelect } from './ui/native-select';
+import { Label } from './ui/label';
+import { Alert, AlertDescription } from './ui/alert';
 export function Field({
   label,
   children,
@@ -17,10 +23,13 @@ export function Field({
   const id = useId();
   return (
     <div className="field">
-      <label htmlFor={id}>{label}</label>
+      <Label htmlFor={id}>{label}</Label>
       {Children.map(children, (child) =>
         isValidElement(child) &&
-        ['input', 'select', 'textarea'].includes(String(child.type))
+        (child.type === Input ||
+          child.type === Textarea ||
+          child.type === NativeSelect ||
+          ['input', 'select', 'textarea'].includes(String(child.type)))
           ? cloneElement(child as ReactElement<{ id?: string }>, { id })
           : child,
       )}
@@ -29,9 +38,9 @@ export function Field({
 }
 export function FormError({ error }: { error: Error | null }) {
   return error ? (
-    <p className="form-error" role="alert">
-      {error.message}
-    </p>
+    <Alert variant="destructive" className="mt-4">
+      <AlertDescription>{error.message}</AlertDescription>
+    </Alert>
   ) : null;
 }
 export function MutationStatus({
@@ -67,9 +76,7 @@ export function ErrorPanel({
   return (
     <section className="panel">
       <FormError error={error} />
-      <button className="button" onClick={retry}>
-        Tentar novamente
-      </button>
+      <Button onClick={retry}>Tentar novamente</Button>
     </section>
   );
 }

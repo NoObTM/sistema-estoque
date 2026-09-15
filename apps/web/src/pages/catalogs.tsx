@@ -1,3 +1,18 @@
+import { Button } from '@/components/ui/button';
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from '@/components/ui/native-select';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from '@/components/ui/table';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Badge, EmptyState, PageHeading } from '../components/ui';
@@ -42,9 +57,9 @@ function Editor({
     <section className="panel">
       <div className="section-heading">
         <h2>{initial.id ? 'Editar cadastro' : 'Novo cadastro'}</h2>
-        <button className="button secondary" onClick={onClose}>
+        <Button variant="outline" onClick={onClose}>
           Fechar
-        </button>
+        </Button>
       </div>
       <form
         onSubmit={handleSubmit(async (values) => {
@@ -66,20 +81,23 @@ function Editor({
           {fields.map((field) => (
             <Field key={field.name} label={field.label}>
               {field.options ? (
-                <select required={field.required} {...register(field.name)}>
-                  <option value="">Selecione</option>
+                <NativeSelect
+                  required={field.required}
+                  {...register(field.name)}
+                >
+                  <NativeSelectOption value="">Selecione</NativeSelectOption>
                   {field.options.map((option) => (
-                    <option value={option.id} key={option.id}>
+                    <NativeSelectOption value={option.id} key={option.id}>
                       {option.name}
-                    </option>
+                    </NativeSelectOption>
                   ))}
-                </select>
+                </NativeSelect>
               ) : field.type === 'checkbox' ? (
                 <input type="checkbox" {...register(field.name)} />
               ) : field.type === 'textarea' ? (
-                <textarea {...register(field.name)} />
+                <Textarea {...register(field.name)} />
               ) : (
-                <input
+                <Input
                   required={field.required}
                   type={field.type ?? 'text'}
                   {...register(field.name)}
@@ -89,7 +107,7 @@ function Editor({
           ))}
           {'photo' in initial && (
             <Field label="Foto do material (até 1 MB)">
-              <input
+              <Input
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
                 onChange={async (event) => {
@@ -107,17 +125,21 @@ function Editor({
                   reader.readAsDataURL(file);
                 }}
               />
-              <button type="button" onClick={() => setValue('photo', null)}>
+              <Button
+                variant="ghost"
+                type="button"
+                onClick={() => setValue('photo', null)}
+              >
                 Remover foto
-              </button>
+              </Button>
               {photoError && <span role="alert">{photoError}</span>}
             </Field>
           )}
         </div>
         <MutationStatus mutation={mutation} />
-        <button className="button form-submit" disabled={mutation.isPending}>
+        <Button className="form-submit" disabled={mutation.isPending}>
           Salvar cadastro
-        </button>
+        </Button>
       </form>
     </section>
   );
@@ -213,7 +235,8 @@ export function CatalogsPage({
           ['LOCATION', 'Obras e depósitos'],
           ...Object.entries(catalogLabels),
         ].map(([key, label]) => (
-          <button
+          <Button
+            variant="ghost"
             key={key}
             className={tab === key ? 'selected' : ''}
             onClick={() => {
@@ -222,7 +245,7 @@ export function CatalogsPage({
             }}
           >
             {label}
-          </button>
+          </Button>
         ))}
       </div>
       {editing && (
@@ -236,52 +259,51 @@ export function CatalogsPage({
       )}
       <section className="panel">
         <div className="section-heading">
-          <input
+          <Input
             aria-label="Buscar cadastro"
             placeholder="Buscar por código ou nome"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
           {canEdit && (
-            <button className="button" onClick={() => openEditor()}>
-              Novo cadastro
-            </button>
+            <Button onClick={() => openEditor()}>Novo cadastro</Button>
           )}
         </div>
         <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Nome</th>
-                <th>Situação</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Código</TableHead>
+                <TableHead>Nome</TableHead>
+                <TableHead>Situação</TableHead>
+                <TableHead>Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {entries.map((entry) => (
-                <tr key={entry.id}>
-                  <td>{entry.code}</td>
-                  <td>{entry.name}</td>
-                  <td>
+                <TableRow key={entry.id}>
+                  <TableCell>{entry.code}</TableCell>
+                  <TableCell>{entry.name}</TableCell>
+                  <TableCell>
                     <Badge tone={entry.active ? 'success' : 'neutral'}>
                       {entry.active ? 'Ativo' : 'Inativo'}
                     </Badge>
-                  </td>
-                  <td>
+                  </TableCell>
+                  <TableCell>
                     {canEdit && (
-                      <button
-                        className="text-link"
+                      <Button
+                        variant="link"
+                        className="mt-4 px-0"
                         onClick={() => openEditor(entry)}
                       >
                         Editar
-                      </button>
+                      </Button>
                     )}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
         {!entries.length && (
           <EmptyState>
@@ -344,8 +366,7 @@ export function MaterialsPage({
         description="Cadastro único, com saldos independentes em cada obra."
         action={
           actor.role === 'ADMIN' && (
-            <button
-              className="button"
+            <Button
               onClick={() =>
                 setEditing({
                   code: '',
@@ -364,7 +385,7 @@ export function MaterialsPage({
               }
             >
               Novo material
-            </button>
+            </Button>
           )
         }
       />
@@ -378,7 +399,7 @@ export function MaterialsPage({
         />
       )}
       <section className="panel">
-        <input
+        <Input
           className="search"
           aria-label="Buscar material"
           placeholder="Nome, código, grupo ou código de barras"
@@ -386,20 +407,20 @@ export function MaterialsPage({
           onChange={(e) => setSearch(e.target.value)}
         />
         <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Material</th>
-                <th>Grupo</th>
-                <th>Unidade</th>
-                <th>Situação</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Material</TableHead>
+                <TableHead>Grupo</TableHead>
+                <TableHead>Unidade</TableHead>
+                <TableHead>Situação</TableHead>
+                <TableHead>Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {entries.map((material) => (
-                <tr key={material.id}>
-                  <td>
+                <TableRow key={material.id}>
+                  <TableCell>
                     <div className="material-cell">
                       {material.photo && <img src={material.photo} alt="" />}
                       <div>
@@ -407,16 +428,17 @@ export function MaterialsPage({
                         <small>{material.code}</small>
                       </div>
                     </div>
-                  </td>
-                  <td>{material.group.name}</td>
-                  <td>{material.unit.code}</td>
-                  <td>
+                  </TableCell>
+                  <TableCell>{material.group.name}</TableCell>
+                  <TableCell>{material.unit.code}</TableCell>
+                  <TableCell>
                     <Badge>{material.active ? 'Ativo' : 'Inativo'}</Badge>
-                  </td>
-                  <td>
+                  </TableCell>
+                  <TableCell>
                     {actor.role === 'ADMIN' && (
-                      <button
-                        className="text-link"
+                      <Button
+                        variant="link"
+                        className="mt-4 px-0"
                         onClick={() => {
                           const { group, unit, ...values } = material;
                           void group;
@@ -425,13 +447,13 @@ export function MaterialsPage({
                         }}
                       >
                         Editar
-                      </button>
+                      </Button>
                     )}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
         {!entries.length && (
           <EmptyState>
