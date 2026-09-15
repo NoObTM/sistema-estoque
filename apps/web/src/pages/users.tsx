@@ -1,9 +1,6 @@
+import { SelectInput } from '@/components/select-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from '@/components/ui/native-select';
 import {
   Table,
   TableHeader,
@@ -113,16 +110,15 @@ export function UsersPage({ locations }: { locations: Location[] }) {
                 </>
               )}
               <Field label="Perfil">
-                <NativeSelect
+                <SelectInput
+                  required
                   value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                >
-                  {roles.map((r) => (
-                    <NativeSelectOption value={r} key={r}>
-                      {roleLabels[r]}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+                  onValueChange={setRole}
+                  options={roles.map((r) => ({
+                    value: r,
+                    label: <>{roleLabels[r]}</>,
+                  }))}
+                />
               </Field>
               {editing !== 'new' && (
                 <Field label="Acesso ativo">

@@ -1,8 +1,6 @@
+import { FormSelect } from '@/components/form-select';
+import { SelectInput } from '@/components/select-input';
 import { Button } from '@/components/ui/button';
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from '@/components/ui/native-select';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -133,77 +131,81 @@ function DocumentEditor({
       >
         <div className="form-grid columns">
           <Field label="Tipo">
-            <NativeSelect {...register('kind')} disabled={!!initial}>
-              {props.kinds.map((k) => (
-                <NativeSelectOption value={k} key={k}>
-                  {kindLabels[k]}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
+            <FormSelect
+              required
+              control={control}
+              name={'kind'}
+              disabled={!!initial}
+              options={props.kinds.map((k) => ({
+                value: k,
+                label: <>{kindLabels[k]}</>,
+              }))}
+            />
           </Field>
           <Field label="Obra / origem">
-            <NativeSelect
+            <FormSelect
               required
-              {...register('locationId')}
+              control={control}
+              name={'locationId'}
               disabled={!!initial}
-            >
-              <NativeSelectOption value="">Selecione</NativeSelectOption>
-              {props.locations
+              emptyLabel="Selecione"
+              options={props.locations
                 .filter((l) => l.active)
-                .map((l) => (
-                  <NativeSelectOption value={l.id} key={l.id}>
-                    {l.name}
-                  </NativeSelectOption>
-                ))}
-            </NativeSelect>
+                .map((l) => ({ value: l.id, label: <>{l.name}</> }))}
+            />
           </Field>
           {kind === 'TRANSFER' && (
             <Field label="Destino">
-              <NativeSelect required {...register('destinationId')}>
-                <NativeSelectOption value="">Selecione</NativeSelectOption>
-                {props.destinations
+              <FormSelect
+                required
+                control={control}
+                name={'destinationId'}
+                emptyLabel="Selecione"
+                options={props.destinations
                   .filter((l) => l.id !== locationId)
-                  .map((l) => (
-                    <NativeSelectOption value={l.id} key={l.id}>
-                      {l.name}
-                    </NativeSelectOption>
-                  ))}
-              </NativeSelect>
+                  .map((l) => ({ value: l.id, label: <>{l.name}</> }))}
+              />
             </Field>
           )}
           {kind === 'ENTRY' && (
             <Field label="Fornecedor">
-              <NativeSelect required {...register('supplierId')}>
-                <NativeSelectOption value="">Selecione</NativeSelectOption>
-                {applicable('SUPPLIER').map((c) => (
-                  <NativeSelectOption value={c.id} key={c.id}>
-                    {c.name}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
+              <FormSelect
+                required
+                control={control}
+                name={'supplierId'}
+                emptyLabel="Selecione"
+                options={applicable('SUPPLIER').map((c) => ({
+                  value: c.id,
+                  label: <>{c.name}</>,
+                }))}
+              />
             </Field>
           )}
           {['EXIT', 'REQUEST'].includes(kind) && (
             <>
               <Field label="Funcionário">
-                <NativeSelect required {...register('employeeId')}>
-                  <NativeSelectOption value="">Selecione</NativeSelectOption>
-                  {applicable('EMPLOYEE').map((c) => (
-                    <NativeSelectOption value={c.id} key={c.id}>
-                      {c.name}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+                <FormSelect
+                  required
+                  control={control}
+                  name={'employeeId'}
+                  emptyLabel="Selecione"
+                  options={applicable('EMPLOYEE').map((c) => ({
+                    value: c.id,
+                    label: <>{c.name}</>,
+                  }))}
+                />
               </Field>
               <Field label="Centro de custo">
-                <NativeSelect required {...register('costCenterId')}>
-                  <NativeSelectOption value="">Selecione</NativeSelectOption>
-                  {applicable('COST_CENTER').map((c) => (
-                    <NativeSelectOption value={c.id} key={c.id}>
-                      {c.name}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+                <FormSelect
+                  required
+                  control={control}
+                  name={'costCenterId'}
+                  emptyLabel="Selecione"
+                  options={applicable('COST_CENTER').map((c) => ({
+                    value: c.id,
+                    label: <>{c.name}</>,
+                  }))}
+                />
               </Field>
             </>
           )}
@@ -234,16 +236,22 @@ function DocumentEditor({
         {fields.map((field, index) => (
           <div className="item-editor" key={field.id}>
             <Field label="Material">
-              <NativeSelect required {...register(`items.${index}.materialId`)}>
-                <NativeSelectOption value="">Selecione</NativeSelectOption>
-                {props.materials
+              <FormSelect
+                required
+                control={control}
+                name={`items.${index}.materialId`}
+                emptyLabel="Selecione"
+                options={props.materials
                   .filter((m) => m.active)
-                  .map((m) => (
-                    <NativeSelectOption value={m.id} key={m.id}>
-                      {m.name} ({m.unit.code})
-                    </NativeSelectOption>
-                  ))}
-              </NativeSelect>
+                  .map((m) => ({
+                    value: m.id,
+                    label: (
+                      <>
+                        {m.name} ({m.unit.code})
+                      </>
+                    ),
+                  }))}
+              />
             </Field>
             <Field label={kind === 'INVENTORY' ? 'Contado' : 'Quantidade'}>
               <Input
@@ -559,17 +567,15 @@ export function OperationsPage(props: Props) {
       )}
       <div className="filters">
         <Field label="Situação">
-          <NativeSelect
+          <SelectInput
             value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          >
-            <NativeSelectOption value="">Todas</NativeSelectOption>
-            {Object.entries(statusLabels).map(([key, label]) => (
-              <NativeSelectOption key={key} value={key}>
-                {label}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
+            onValueChange={setFilter}
+            emptyLabel="Todas"
+            options={Object.entries(statusLabels).map(([key, label]) => ({
+              value: key,
+              label: <>{label}</>,
+            }))}
+          />
         </Field>
         <span className="muted">{entries.length} documentos carregados</span>
       </div>

@@ -1,7 +1,4 @@
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from '@/components/ui/native-select';
+import { SelectInput } from '@/components/select-input';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { NavLink, Route, Routes } from 'react-router';
@@ -142,19 +139,16 @@ function Workspace({ actor }: { actor: Actor }) {
           <label className="location-selector">
             <Building2 size={18} />
             <span className="sr-only">Obra ou depósito</span>
-            <NativeSelect
+            <SelectInput
+              aria-label="Obra ou depósito"
               value={locationId}
-              onChange={(e) => setLocationId(e.target.value)}
-            >
-              <NativeSelectOption value="">
-                Todos os locais autorizados
-              </NativeSelectOption>
-              {locations.data!.map((l) => (
-                <NativeSelectOption value={l.id} key={l.id}>
-                  {l.name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
+              onValueChange={setLocationId}
+              emptyLabel="Todos os locais autorizados"
+              options={locations.data!.map((l) => ({
+                value: l.id,
+                label: <>{l.name}</>,
+              }))}
+            />
           </label>
           <Button
             variant="outline"

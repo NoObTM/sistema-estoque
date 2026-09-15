@@ -1,7 +1,4 @@
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from '@/components/ui/native-select';
+import { FormSelect } from '@/components/form-select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -201,7 +198,7 @@ function StockSettings({
   materials: Material[];
   onClose: () => void;
 }) {
-  const { register, handleSubmit } = useForm({
+  const { register, handleSubmit, control } = useForm({
     defaultValues: stock
       ? {
           locationId: stock.locationId,
@@ -232,32 +229,30 @@ function StockSettings({
       >
         <div className="form-grid columns">
           <Field label="Obra">
-            <NativeSelect
+            <FormSelect
               required
-              {...register('locationId')}
+              control={control}
+              name={'locationId'}
               disabled={!!stock}
-            >
-              <NativeSelectOption value="">Selecione</NativeSelectOption>
-              {locations.map((l) => (
-                <NativeSelectOption value={l.id} key={l.id}>
-                  {l.name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
+              emptyLabel="Selecione"
+              options={locations.map((l) => ({
+                value: l.id,
+                label: <>{l.name}</>,
+              }))}
+            />
           </Field>
           <Field label="Material">
-            <NativeSelect
+            <FormSelect
               required
-              {...register('materialId')}
+              control={control}
+              name={'materialId'}
               disabled={!!stock}
-            >
-              <NativeSelectOption value="">Selecione</NativeSelectOption>
-              {materials.map((m) => (
-                <NativeSelectOption value={m.id} key={m.id}>
-                  {m.name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
+              emptyLabel="Selecione"
+              options={materials.map((m) => ({
+                value: m.id,
+                label: <>{m.name}</>,
+              }))}
+            />
           </Field>
           <Field label="Estoque mínimo">
             <Input required {...register('minimum')} />

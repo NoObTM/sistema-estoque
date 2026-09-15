@@ -10,7 +10,8 @@ import type { UseMutationResult } from '@tanstack/react-query';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { NativeSelect } from './ui/native-select';
+import { SelectInput } from './select-input';
+import { FormSelect } from './form-select';
 import { Label } from './ui/label';
 import { Alert, AlertDescription } from './ui/alert';
 export function Field({
@@ -28,7 +29,8 @@ export function Field({
         isValidElement(child) &&
         (child.type === Input ||
           child.type === Textarea ||
-          child.type === NativeSelect ||
+          child.type === SelectInput ||
+          child.type === FormSelect ||
           ['input', 'select', 'textarea'].includes(String(child.type)))
           ? cloneElement(child as ReactElement<{ id?: string }>, { id })
           : child,

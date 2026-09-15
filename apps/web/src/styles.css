@@ -3,6 +3,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-card: var(--card);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--foreground);
   --color-card-foreground: var(--foreground);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
@@ -588,7 +590,7 @@
     gap: 10px;
     color: var(--primary);
   }
-  .location-selector select {
+  .location-selector [data-slot='select-trigger'] {
     font-size: 12px;
     background: #f7f9fa;
     min-width: 225px;
@@ -1008,7 +1010,7 @@
     .location-selector {
       width: 100%;
     }
-    .location-selector select {
+    .location-selector [data-slot='select-trigger'] {
       width: 100%;
     }
     .demo-banner {

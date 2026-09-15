@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { hashPassword } from 'better-auth/crypto';
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { db } from '../../apps/api/src/database';
 import { env } from '../../apps/api/src/config';
 
@@ -9,6 +9,13 @@ if (
   new URL(env.DATABASE_URL).pathname !== '/estoque_test'
 )
   throw new Error('Use npm run test:e2e com banco isolado.');
+async function chooseOption(page: Page, label: string, option: string) {
+  const trigger = page.getByRole('combobox', { name: label, exact: true });
+  await trigger.click();
+  await page.getByRole('option', { name: option, exact: true }).click();
+  await expect(trigger).toHaveText(option);
+}
+
 let email: string;
 let password: string;
 test.beforeAll(async () => {
@@ -50,6 +57,21 @@ test('transferência com conferência parcial e bloqueio de excesso pela interfa
   await page.screenshot({
     path: `artifacts/dashboard-${testInfo.project.name}.png`,
   });
+  const locationSelect = page.getByRole('combobox', {
+    name: 'Obra ou depósito',
+  });
+  await locationSelect.focus();
+  await locationSelect.press('ArrowDown');
+  await expect(page.getByRole('listbox')).toBeVisible();
+  await expect(page.getByRole('listbox')).toHaveCSS(
+    'background-color',
+    'rgb(255, 255, 255)',
+  );
+  await page.screenshot({
+    path: `artifacts/select-${testInfo.project.name}.png`,
+  });
+  await page.keyboard.press('Escape');
+  await expect(locationSelect).toBeFocused();
   async function post(path: string, data: unknown) {
     const response = await page.request.post(`/api${path}`, {
       headers: { Origin: env.APP_URL, 'Idempotency-Key': randomUUID() },
@@ -93,11 +115,9 @@ test('transferência com conferência parcial e bloqueio de excesso pela interfa
   await post(`/documents/${initial.id}/confirm`, {});
   await page.goto('/transferencias');
   await page.getByRole('button', { name: 'Novo documento' }).click();
-  await page.getByLabel('Obra / origem').selectOption(origin.id);
-  await page
-    .getByLabel('Destino', { exact: true })
-    .selectOption(destination.id);
-  await page.getByLabel('Material', { exact: true }).selectOption(material.id);
+  await chooseOption(page, 'Obra / origem', origin.name);
+  await chooseOption(page, 'Destino', destination.name);
+  await chooseOption(page, 'Material', `${material.name} (${unit.code})`);
   await page.getByLabel('Quantidade', { exact: true }).fill('20');
   await page.getByRole('button', { name: 'Salvar rascunho' }).click();
   const doc = page.locator('section').filter({
@@ -179,12 +199,15 @@ test('login, cadastro persistente e movimentação real pelo navegador', async (
     .click();
   await page.getByLabel('Código', { exact: true }).fill(`MAT-${suffix}`);
   await page.getByLabel('Nome do material').fill(`Cimento ${suffix}`);
-  await page
-    .getByLabel('Grupo', { exact: true })
-    .selectOption({ label: `Grupos ${suffix}` });
-  await page
-    .getByLabel('Unidade', { exact: true })
-    .selectOption({ label: `Unidades ${suffix}` });
+  await page.getByRole('button', { name: 'Salvar cadastro' }).click();
+  await expect(
+    page.getByRole('combobox', { name: 'Grupo', exact: true }),
+  ).toHaveAttribute('aria-invalid', 'true');
+  await expect(
+    page.getByRole('combobox', { name: 'Grupo', exact: true }),
+  ).toBeFocused();
+  await chooseOption(page, 'Grupo', `Grupos ${suffix}`);
+  await chooseOption(page, 'Unidade', `Unidades ${suffix}`);
   await page.getByRole('button', { name: 'Salvar cadastro' }).click();
   await expect(
     page.getByText(`Cimento ${suffix}`, { exact: true }),
@@ -197,16 +220,16 @@ test('login, cadastro persistente e movimentação real pelo navegador', async (
     .getByRole('link', { name: 'Entradas e saídas', exact: true })
     .click();
   await page.getByRole('button', { name: 'Novo documento' }).click();
-  await page.getByLabel('Tipo', { exact: true }).selectOption('INITIAL');
-  await page
-    .getByLabel('Obra / origem')
-    .selectOption({ label: `Obra ${suffix}` });
+  await chooseOption(page, 'Tipo', 'Saldo inicial');
+  await chooseOption(page, 'Obra / origem', `Obra ${suffix}`);
   await page
     .getByLabel('Observações / justificativa')
     .fill('Contagem inicial conferida');
-  await page
-    .getByLabel('Material', { exact: true })
-    .selectOption({ label: `Cimento ${suffix} (Unidades-${suffix})` });
+  await chooseOption(
+    page,
+    'Material',
+    `Cimento ${suffix} (Unidades-${suffix})`,
+  );
   await page.getByLabel('Quantidade', { exact: true }).fill('20');
   await page.getByLabel('Custo unitário (R$)').fill('15');
   await page.getByRole('button', { name: 'Salvar rascunho' }).click();
@@ -219,9 +242,8 @@ test('login, cadastro persistente e movimentação real pelo navegador', async (
   await page
     .getByRole('link', { name: 'Estoque por obra', exact: true })
     .click();
-  await page
-    .getByRole('combobox', { name: 'Obra ou depósito' })
-    .selectOption({ label: `Obra ${suffix}` });
+  await chooseOption(page, 'Obra ou depósito', `Obra ${suffix}`);
+  await chooseOption(page, 'Obra ou depósito', 'Todos os locais autorizados');
   await page.reload();
   await expect(
     page.getByRole('row').filter({ hasText: `Cimento ${suffix}` }),

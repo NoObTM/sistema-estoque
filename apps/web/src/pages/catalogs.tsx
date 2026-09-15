@@ -1,8 +1,5 @@
+import { FormSelect } from '@/components/form-select';
 import { Button } from '@/components/ui/button';
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import {
@@ -48,7 +45,7 @@ function Editor({
   fields: FormField[];
   onClose: () => void;
 }) {
-  const { register, handleSubmit, setValue } = useForm<Values>({
+  const { register, handleSubmit, setValue, control } = useForm<Values>({
     defaultValues: initial,
   });
   const mutation = useCommand();
@@ -81,17 +78,16 @@ function Editor({
           {fields.map((field) => (
             <Field key={field.name} label={field.label}>
               {field.options ? (
-                <NativeSelect
+                <FormSelect
                   required={field.required}
-                  {...register(field.name)}
-                >
-                  <NativeSelectOption value="">Selecione</NativeSelectOption>
-                  {field.options.map((option) => (
-                    <NativeSelectOption value={option.id} key={option.id}>
-                      {option.name}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+                  control={control}
+                  name={field.name}
+                  emptyLabel="Selecione"
+                  options={field.options.map((option) => ({
+                    value: option.id,
+                    label: <>{option.name}</>,
+                  }))}
+                />
               ) : field.type === 'checkbox' ? (
                 <input type="checkbox" {...register(field.name)} />
               ) : field.type === 'textarea' ? (
