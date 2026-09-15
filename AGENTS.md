@@ -2,6 +2,7 @@
 
 ## Escopo e arquitetura
 
+- Mantenha frontend em `apps/web` e backend em `apps/api`, com dependências, configuração e scripts próprios por aplicação. A comunicação será por HTTP; não importe código interno de uma aplicação na outra. Contratos comuns ficam em `packages/contracts`.
 - Leia o plano e `docs/architecture.md` antes de alterar regras de negócio.
 - Organize a interface por funcionalidades; componentes compartilhados não devem conhecer dados de demonstração.
 - A API validará autorização por local, entrada e regras em cada operação. A interface não é uma barreira de segurança.

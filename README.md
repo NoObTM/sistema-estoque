@@ -32,6 +32,7 @@ Os testes de navegador usam Microsoft Edge localmente e Chromium no GitHub Actio
 ## Estrutura
 
 ```text
+apps/api/         Backend Fastify (diretório reservado; implementação na etapa 2)
 apps/web/src/
   components/     Elementos visuais compartilhados
   demo/           Dados fictícios e operações em memória
@@ -40,7 +41,9 @@ packages/contracts/src/  Quantidades e validações compartilhadas
 docs/             Arquitetura, banco, permissões e roteiro de revisão
 ```
 
-`apps/api`, `apps/worker` e `packages/database` serão criados quando suas implementações começarem. TanStack Query, React Hook Form, shadcn/ui e Better Auth entram conforme as telas reais e a API forem implementadas. A base atual usa React, Vite, TypeScript, React Router, Tailwind CSS, Zod e Vitest.
+Frontend e backend ficam em diretórios separados: `apps/web` e `apps/api`. Cada aplicação terá suas próprias dependências, configuração e scripts. A comunicação será por HTTP, compartilhando apenas contratos em `packages/contracts`.
+
+`apps/worker` e `packages/database` serão criados quando suas implementações começarem. TanStack Query, React Hook Form, shadcn/ui e Better Auth entram conforme as telas reais e a API forem implementadas. A base atual usa React, Vite, TypeScript, React Router, Tailwind CSS, Zod e Vitest.
 
 ## Revisar a primeira entrega
 
