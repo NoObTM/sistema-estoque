@@ -5,9 +5,16 @@ import globals from 'globals';
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/**', '**/node_modules/**', 'artifacts/**', '.tools/**'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      'artifacts/**',
+      '.tools/**',
+      'packages/database/generated/**',
+    ],
   },
   js.configs.recommended,
+  { files: ['scripts/**/*.mjs'], languageOptions: { globals: globals.node } },
   ...tseslint.configs.recommended,
   {
     files: ['**/*.{ts,tsx}'],

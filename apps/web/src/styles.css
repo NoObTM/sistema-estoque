@@ -1,5 +1,263 @@
 @import 'tailwindcss';
 
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+  min-width: 0;
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+}
+.field input[type='checkbox'] {
+  width: 18px;
+  min-height: 18px;
+}
+.field textarea {
+  min-height: 85px;
+  padding: 10px;
+  border: 1px solid #cedbdf;
+  border-radius: 7px;
+  resize: vertical;
+}
+.form-grid {
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
+}
+.form-grid.columns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.form-submit {
+  margin-top: 22px;
+}
+.secondary {
+  background: #eef4f5 !important;
+  color: #004d61 !important;
+  border: 1px solid #d9e5e8 !important;
+}
+.actions-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.tabs {
+  display: flex;
+  gap: 8px;
+  overflow: auto;
+  margin-bottom: 24px;
+}
+.tabs button {
+  border: 1px solid #dce6e8;
+  border-radius: 7px;
+  padding: 11px 16px;
+  white-space: nowrap;
+  font-size: 12px;
+  background: #fff;
+}
+.tabs .selected {
+  background: #004d61;
+  color: white;
+}
+.filters {
+  display: flex;
+  align-items: end;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.item-editor {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin: 18px 0;
+}
+.form-section-title {
+  margin: 25px 0 8px;
+}
+.document-notes {
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 15px 0;
+}
+.document-actions {
+  margin-top: 20px;
+}
+.action-confirm {
+  background: #f0f7f8;
+  border-radius: 8px;
+  padding: 20px;
+  display: grid;
+  gap: 15px;
+  margin-top: 16px;
+}
+.history {
+  margin-top: 20px;
+  font-size: 12px;
+}
+.history summary {
+  cursor: pointer;
+  color: #004d61;
+}
+.history p {
+  padding: 10px 0;
+  border-bottom: 1px solid #edf1f3;
+}
+.material-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.material-cell img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+.auth-layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 70px;
+  padding: 70px;
+  max-width: 1300px;
+  margin: auto;
+}
+.auth-intro h1 {
+  font-size: 48px;
+  color: #004d61;
+  max-width: 500px;
+}
+.auth-intro > p:last-child {
+  margin-top: 25px;
+  line-height: 1.8;
+  color: #60808b;
+}
+.auth-panel {
+  padding: 35px !important;
+}
+.auth-panel > p {
+  margin-top: 14px;
+}
+.location-checks {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  border: 1px solid #dbe5e8;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 25px;
+  font-size: 12px;
+}
+.location-checks label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.location-checks input {
+  min-height: 18px;
+}
+.metric-value {
+  font-size: 27px !important;
+}
+.info-note input {
+  width: 100%;
+  margin-top: 12px;
+}
+.sidebar nav {
+  overflow-y: auto;
+}
+.sidebar-footer {
+  padding-top: 15px !important;
+}
+.sidebar .nav-caption {
+  margin-top: 28px !important;
+}
+@media (max-width: 900px) {
+  .item-editor {
+    grid-template-columns: 1fr 1fr;
+  }
+  .auth-layout {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 30px;
+  }
+  .auth-intro h1 {
+    font-size: 34px;
+  }
+  .auth-panel {
+    margin-bottom: 0 !important;
+  }
+}
+@media (max-width: 700px) {
+  .form-grid.columns,
+  .item-editor {
+    grid-template-columns: 1fr;
+  }
+  .field {
+    width: 100%;
+  }
+  .auth-layout {
+    padding: 20px;
+  }
+  .auth-panel {
+    padding: 22px !important;
+  }
+  .topbar {
+    flex-wrap: wrap;
+  }
+  .metric-value {
+    font-size: 22px !important;
+  }
+  .sidebar nav {
+    overflow-y: hidden;
+  }
+  .filters .field {
+    width: auto;
+  }
+  .section-heading > input {
+    max-width: 60%;
+  }
+}
+@media print {
+  .sidebar,
+  .topbar,
+  .page-footer,
+  .page-heading > .actions-row,
+  .tabs,
+  .filters {
+    display: none !important;
+  }
+  .app-shell,
+  .workspace,
+  main {
+    display: block !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+  .panel {
+    border: 0 !important;
+    padding: 8px !important;
+  }
+  .table-scroll {
+    overflow: visible !important;
+  }
+  table {
+    white-space: normal !important;
+    font-size: 10px !important;
+  }
+  body {
+    background: white !important;
+  }
+}
+
 :root {
   font-family: Inter, 'Segoe UI', sans-serif;
   color: #203c46;

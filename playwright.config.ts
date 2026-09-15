@@ -14,10 +14,17 @@ export default defineConfig({
       use: { ...devices['iPhone 13'], defaultBrowserType: 'chromium' },
     },
   ],
-  webServer: {
-    command:
-      'npm run dev --workspace @estoque/web -- --host 127.0.0.1 --port 4173 --strictPort',
-    url: 'http://127.0.0.1:4173',
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: [
+    {
+      command: 'npm run start --workspace @estoque/api',
+      url: 'http://127.0.0.1:3002/api/health',
+      reuseExistingServer: false,
+    },
+    {
+      command:
+        'npm run dev --workspace @estoque/web -- --host 127.0.0.1 --port 4173 --strictPort',
+      url: 'http://127.0.0.1:4173',
+      reuseExistingServer: false,
+    },
+  ],
 });

@@ -6,3 +6,5 @@ artifacts
 plano-sistema-estoque-construtora.md
 **/*.md
 **/*.pdf
+packages/database/generated/
+**/*.prisma

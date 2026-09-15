@@ -9,9 +9,13 @@
   },
   "dependencies": {
     "@estoque/contracts": "0.1.0",
+    "@hookform/resolvers": "^5.9.1",
+    "@tanstack/react-query": "^5.102.8",
+    "better-auth": "^1.7.5",
     "lucide-react": "^0.468.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-hook-form": "^7.88.0",
     "react-router": "^7.9.0"
   },
   "devDependencies": {

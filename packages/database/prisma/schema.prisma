@@ -1,0 +1,237 @@
+generator client {
+  provider = "prisma-client"
+  output = "../generated/client"
+}
+datasource db {
+  provider = "postgresql"
+}
+model User {
+  id String @id
+  name String
+  email String @unique
+  emailVerified Boolean @default(false)
+  image String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  role String @default("VIEWER")
+  active Boolean @default(true)
+  sessions Session[]
+  accounts Account[]
+  memberships Membership[]
+}
+model Session {
+  id String @id
+  expiresAt DateTime
+  token String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+model Account {
+  id String @id
+  accountId String
+  providerId String
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken String?
+  refreshToken String?
+  idToken String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope String?
+  password String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId])
+  @@unique([providerId, accountId])
+}
+model Verification {
+  id String @id
+  identifier String
+  value String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([identifier])
+}
+model Location {
+  id String @id @default(uuid())
+  code String @unique
+  name String
+  kind String
+  address String @default("")
+  responsible String @default("")
+  active Boolean @default(true)
+  memberships Membership[]
+  stocks Stock[]
+  catalogs Catalog[]
+  origins Document[] @relation("origin")
+  destinations Document[] @relation("destination")
+  ledger Ledger[]
+  createdAt DateTime @default(now())
+}
+model Membership {
+  userId String
+  locationId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  @@id([userId, locationId])
+}
+model Catalog {
+  id String @id @default(uuid())
+  kind String
+  code String
+  name String
+  details String @default("")
+  locationId String?
+  location Location? @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  active Boolean @default(true)
+  groups Material[] @relation("group")
+  units Material[] @relation("unit")
+  @@unique([kind, code])
+}
+model Material {
+  id String @id @default(uuid())
+  code String @unique
+  name String
+  groupId String
+  unitId String
+  group Catalog @relation("group", fields: [groupId], references: [id], onDelete: Restrict)
+  unit Catalog @relation("unit", fields: [unitId], references: [id], onDelete: Restrict)
+  barcode String? @unique
+  ncm String @default("")
+  reference String @default("")
+  notes String @default("")
+  weight Decimal @default(0) @db.Decimal(15,3)
+  referenceCost Decimal @default(0) @db.Decimal(18,6)
+  photo String?
+  active Boolean @default(true)
+  stocks Stock[]
+  items DocumentItem[]
+  ledger Ledger[]
+  createdAt DateTime @default(now())
+}
+model Stock {
+  id String @id @default(uuid())
+  locationId String
+  materialId String
+  location Location @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  material Material @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  quantity Decimal @default(0) @db.Decimal(15,3)
+  averageCost Decimal @default(0) @db.Decimal(18,6)
+  minimum Decimal @default(0) @db.Decimal(15,3)
+  ideal Decimal @default(0) @db.Decimal(15,3)
+  address String @default("")
+  version Int @default(0)
+  @@unique([locationId, materialId])
+}
+model Document {
+  id String @id @default(uuid())
+  number Int @unique @default(autoincrement())
+  kind String
+  status String @default("DRAFT")
+  locationId String
+  destinationId String?
+  location Location @relation("origin", fields: [locationId], references: [id], onDelete: Restrict)
+  destination Location? @relation("destination", fields: [destinationId], references: [id], onDelete: Restrict)
+  supplierId String?
+  employeeId String?
+  costCenterId String?
+  reference String @default("")
+  notes String @default("")
+  neededAt String?
+  createdBy String
+  confirmedBy String?
+  createdAt DateTime @default(now())
+  confirmedAt DateTime?
+  originalId String?
+  original Document? @relation("correction", fields: [originalId], references: [id], onDelete: Restrict)
+  corrections Document[] @relation("correction")
+  items DocumentItem[]
+  events DocumentEvent[]
+  ledger Ledger[]
+  @@index([locationId, kind, createdAt])
+  attachments Attachment[]
+  @@index([destinationId, status])
+}
+model DocumentItem {
+  id String @id @default(uuid())
+  documentId String
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  materialId String
+  material Material @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  quantity Decimal @db.Decimal(15,3)
+  completed Decimal @default(0) @db.Decimal(15,3)
+  returned Decimal @default(0) @db.Decimal(15,3)
+  lost Decimal @default(0) @db.Decimal(15,3)
+  unitCost Decimal @default(0) @db.Decimal(18,6)
+  baseVersion Int @default(0)
+  baseQuantity Decimal @default(0) @db.Decimal(15,3)
+  @@unique([documentId, materialId])
+}
+model DocumentEvent {
+  id String @id @default(uuid())
+  documentId String
+  document Document @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  kind String
+  actorId String
+  notes String
+  items Json
+  createdAt DateTime @default(now())
+}
+model Ledger {
+  id String @id @default(uuid())
+  locationId String
+  materialId String
+  documentId String
+  location Location @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  material Material @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  document Document @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  delta Decimal @db.Decimal(15,3)
+  balance Decimal @db.Decimal(15,3)
+  unitCost Decimal @db.Decimal(18,6)
+  actorId String
+  createdAt DateTime @default(now())
+  @@index([locationId, materialId, createdAt, id])
+}
+model Idempotency {
+  id String @id
+  hash String
+  result Json
+  createdAt DateTime @default(now())
+}
+model Audit {
+  id String @id @default(uuid())
+  actorId String
+  action String
+  entityId String
+  details Json
+  createdAt DateTime @default(now())
+}
+model Invitation {
+  id String @id @default(uuid())
+  email String
+  name String
+  role String
+  locationIds String[]
+  tokenHash String @unique
+  expiresAt DateTime
+  acceptedAt DateTime?
+  createdBy String
+  createdAt DateTime @default(now())
+}
+model Attachment {
+  id String @id @default(uuid())
+  documentId String
+  document Document @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  actorId String
+  name String
+  mime String
+  data Bytes
+  createdAt DateTime @default(now())
+  @@index([documentId])
+}
