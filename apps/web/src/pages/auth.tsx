@@ -1,9 +1,10 @@
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { api } from '../lib/api';
-import { Field, FormError } from '../components/forms';
+import { Field, FormError, StatusMessage } from '../components/forms';
 
 export function AuthPage({
   setup,
@@ -44,135 +45,139 @@ export function AuthPage({
         <h1>Seu estoque conectado a todas as obras.</h1>
         <p>Materiais, movimentações e conferências em um único lugar.</p>
       </section>
-      <section className="panel auth-panel">
-        <h2>{title}</h2>
-        <p className="muted">
-          {setup
-            ? 'Use a chave SETUP_TOKEN do arquivo .env da instalação.'
-            : 'Acesso exclusivo para a equipe da construtora.'}
-        </p>
-        <form
-          className="form-grid"
-          onSubmit={handleSubmit(async (values) => {
-            setError(null);
-            setMessage('');
-            try {
-              if (setup || invitation) {
-                await api(setup ? '/setup' : '/invitations/accept', {
-                  method: 'POST',
-                  body: { ...values, token: setup ? values.token : token },
-                });
-                await api('/auth/sign-in/email', {
-                  method: 'POST',
-                  body: { email: values.email, password: values.password },
-                });
-                window.history.replaceState({}, '', '/');
-                await onSuccess();
-              } else if (reset) {
-                await api('/auth/reset-password', {
-                  method: 'POST',
-                  body: { token, newPassword: values.password },
-                });
-                setMessage('Senha alterada. Você já pode entrar.');
-              } else if (forgot) {
-                await api('/auth/request-password-reset', {
-                  method: 'POST',
-                  body: {
-                    email: values.email,
-                    redirectTo: `${window.location.origin}/redefinir-senha`,
-                  },
-                });
-                setMessage(
-                  'Se o e-mail estiver cadastrado, você receberá as instruções.',
-                );
-              } else {
-                await api('/auth/sign-in/email', {
-                  method: 'POST',
-                  body: { email: values.email, password: values.password },
-                });
-                await onSuccess();
-              }
-            } catch (cause) {
-              setError(
-                cause instanceof Error ? cause : new Error('Falha ao entrar.'),
-              );
-            }
-          })}
-        >
-          {(setup || invitation) && (
-            <Field label="Nome completo">
-              <Input required autoComplete="name" {...register('name')} />
-            </Field>
-          )}
-          {!reset && (
-            <Field label="E-mail">
-              <Input
-                required
-                type="email"
-                autoComplete="username"
-                {...register('email')}
-              />
-            </Field>
-          )}
-          {!forgot && (
-            <Field label="Senha">
-              <Input
-                required
-                type="password"
-                minLength={setup || invitation || reset ? 12 : 1}
-                autoComplete={
-                  setup || invitation || reset
-                    ? 'new-password'
-                    : 'current-password'
-                }
-                {...register('password')}
-              />
-            </Field>
-          )}
-          {setup && (
-            <Field label="Chave de instalação">
-              <Input
-                required
-                type="password"
-                autoComplete="off"
-                {...register('token')}
-              />
-            </Field>
-          )}
-          <FormError error={error} />
-          {message && <p role="status">{message}</p>}
-          <Button variant="highlight" disabled={isSubmitting}>
-            {isSubmitting
-              ? 'Aguarde…'
-              : setup
-                ? 'Criar administrador'
-                : invitation
-                  ? 'Ativar meu acesso'
-                  : reset
-                    ? 'Salvar senha'
-                    : forgot
-                      ? 'Enviar instruções'
-                      : 'Entrar'}
-          </Button>
-        </form>
-        {!setup && !invitation && !reset && (
-          <Button
-            variant="link"
-            className="mt-4 px-0"
-            onClick={() => {
-              setForgot(!forgot);
+      <Card asChild className="block gap-0">
+        <section className="panel auth-panel">
+          <h2>{title}</h2>
+          <p className="muted">
+            {setup
+              ? 'Use a chave SETUP_TOKEN do arquivo .env da instalação.'
+              : 'Acesso exclusivo para a equipe da construtora.'}
+          </p>
+          <form
+            className="form-grid"
+            onSubmit={handleSubmit(async (values) => {
+              setError(null);
               setMessage('');
-            }}
+              try {
+                if (setup || invitation) {
+                  await api(setup ? '/setup' : '/invitations/accept', {
+                    method: 'POST',
+                    body: { ...values, token: setup ? values.token : token },
+                  });
+                  await api('/auth/sign-in/email', {
+                    method: 'POST',
+                    body: { email: values.email, password: values.password },
+                  });
+                  window.history.replaceState({}, '', '/');
+                  await onSuccess();
+                } else if (reset) {
+                  await api('/auth/reset-password', {
+                    method: 'POST',
+                    body: { token, newPassword: values.password },
+                  });
+                  setMessage('Senha alterada. Você já pode entrar.');
+                } else if (forgot) {
+                  await api('/auth/request-password-reset', {
+                    method: 'POST',
+                    body: {
+                      email: values.email,
+                      redirectTo: `${window.location.origin}/redefinir-senha`,
+                    },
+                  });
+                  setMessage(
+                    'Se o e-mail estiver cadastrado, você receberá as instruções.',
+                  );
+                } else {
+                  await api('/auth/sign-in/email', {
+                    method: 'POST',
+                    body: { email: values.email, password: values.password },
+                  });
+                  await onSuccess();
+                }
+              } catch (cause) {
+                setError(
+                  cause instanceof Error
+                    ? cause
+                    : new Error('Falha ao entrar.'),
+                );
+              }
+            })}
           >
-            {forgot ? 'Voltar ao login' : 'Esqueci minha senha'}
-          </Button>
-        )}
-        {reset && (
-          <a className="text-link" href="/">
-            Voltar ao login
-          </a>
-        )}
-      </section>
+            {(setup || invitation) && (
+              <Field label="Nome completo">
+                <Input required autoComplete="name" {...register('name')} />
+              </Field>
+            )}
+            {!reset && (
+              <Field label="E-mail">
+                <Input
+                  required
+                  type="email"
+                  autoComplete="username"
+                  {...register('email')}
+                />
+              </Field>
+            )}
+            {!forgot && (
+              <Field label="Senha">
+                <Input
+                  required
+                  type="password"
+                  minLength={setup || invitation || reset ? 12 : 1}
+                  autoComplete={
+                    setup || invitation || reset
+                      ? 'new-password'
+                      : 'current-password'
+                  }
+                  {...register('password')}
+                />
+              </Field>
+            )}
+            {setup && (
+              <Field label="Chave de instalação">
+                <Input
+                  required
+                  type="password"
+                  autoComplete="off"
+                  {...register('token')}
+                />
+              </Field>
+            )}
+            <FormError error={error} />
+            {message && <StatusMessage>{message}</StatusMessage>}
+            <Button variant="highlight" disabled={isSubmitting}>
+              {isSubmitting
+                ? 'Aguarde…'
+                : setup
+                  ? 'Criar administrador'
+                  : invitation
+                    ? 'Ativar meu acesso'
+                    : reset
+                      ? 'Salvar senha'
+                      : forgot
+                        ? 'Enviar instruções'
+                        : 'Entrar'}
+            </Button>
+          </form>
+          {!setup && !invitation && !reset && (
+            <Button
+              variant="link"
+              className="mt-4 px-0"
+              onClick={() => {
+                setForgot(!forgot);
+                setMessage('');
+              }}
+            >
+              {forgot ? 'Voltar ao login' : 'Esqueci minha senha'}
+            </Button>
+          )}
+          {reset && (
+            <a className="text-link" href="/">
+              Voltar ao login
+            </a>
+          )}
+        </section>
+      </Card>
     </div>
   );
 }

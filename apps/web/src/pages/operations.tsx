@@ -1,6 +1,10 @@
+import { FieldError } from '@/components/ui/field';
+import { Card } from '@/components/ui/card';
 import { FormSelect } from '@/components/form-select';
 import { SelectInput } from '@/components/select-input';
 import { Button } from '@/components/ui/button';
+import { FormDatePicker } from '@/components/form-date-picker';
+import { Disclosure } from '@/components/disclosure';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -110,197 +114,196 @@ function DocumentEditor({
         (!c.locationId || c.locationId === locationId),
     );
   return (
-    <section className="panel">
-      <div className="section-heading">
-        <h2>{initial ? `Editar #${initial.number}` : 'Novo documento'}</h2>
-        <Button variant="outline" onClick={onClose}>
-          Fechar
-        </Button>
-      </div>
-      <form
-        onSubmit={handleSubmit(async (body) => {
-          await mutation
-            .mutateAsync({
-              path: `/documents${initial ? `/${initial.id}` : ''}`,
-              method: initial ? 'PUT' : 'POST',
-              body,
-            })
-            .then(onClose)
-            .catch(() => {});
-        })}
-      >
-        <div className="form-grid columns">
-          <Field label="Tipo">
-            <FormSelect
-              required
-              control={control}
-              name={'kind'}
-              disabled={!!initial}
-              options={props.kinds.map((k) => ({
-                value: k,
-                label: <>{kindLabels[k]}</>,
-              }))}
-            />
-          </Field>
-          <Field label="Obra / origem">
-            <FormSelect
-              required
-              control={control}
-              name={'locationId'}
-              disabled={!!initial}
-              emptyLabel="Selecione"
-              options={props.locations
-                .filter((l) => l.active)
-                .map((l) => ({ value: l.id, label: <>{l.name}</> }))}
-            />
-          </Field>
-          {kind === 'TRANSFER' && (
-            <Field label="Destino">
+    <Card asChild className="block gap-0">
+      <section className="panel">
+        <div className="section-heading">
+          <h2>{initial ? `Editar #${initial.number}` : 'Novo documento'}</h2>
+          <Button variant="outline" onClick={onClose}>
+            Fechar
+          </Button>
+        </div>
+        <form
+          onSubmit={handleSubmit(async (body) => {
+            await mutation
+              .mutateAsync({
+                path: `/documents${initial ? `/${initial.id}` : ''}`,
+                method: initial ? 'PUT' : 'POST',
+                body,
+              })
+              .then(onClose)
+              .catch(() => {});
+          })}
+        >
+          <div className="form-grid columns">
+            <Field label="Tipo">
               <FormSelect
                 required
                 control={control}
-                name={'destinationId'}
-                emptyLabel="Selecione"
-                options={props.destinations
-                  .filter((l) => l.id !== locationId)
-                  .map((l) => ({ value: l.id, label: <>{l.name}</> }))}
-              />
-            </Field>
-          )}
-          {kind === 'ENTRY' && (
-            <Field label="Fornecedor">
-              <FormSelect
-                required
-                control={control}
-                name={'supplierId'}
-                emptyLabel="Selecione"
-                options={applicable('SUPPLIER').map((c) => ({
-                  value: c.id,
-                  label: <>{c.name}</>,
+                name={'kind'}
+                disabled={!!initial}
+                options={props.kinds.map((k) => ({
+                  value: k,
+                  label: <>{kindLabels[k]}</>,
                 }))}
               />
             </Field>
-          )}
-          {['EXIT', 'REQUEST'].includes(kind) && (
-            <>
-              <Field label="Funcionário">
-                <FormSelect
-                  required
-                  control={control}
-                  name={'employeeId'}
-                  emptyLabel="Selecione"
-                  options={applicable('EMPLOYEE').map((c) => ({
-                    value: c.id,
-                    label: <>{c.name}</>,
-                  }))}
-                />
-              </Field>
-              <Field label="Centro de custo">
-                <FormSelect
-                  required
-                  control={control}
-                  name={'costCenterId'}
-                  emptyLabel="Selecione"
-                  options={applicable('COST_CENTER').map((c) => ({
-                    value: c.id,
-                    label: <>{c.name}</>,
-                  }))}
-                />
-              </Field>
-            </>
-          )}
-          <Field label="Documento / referência">
-            <Input {...register('reference')} />
-          </Field>
-          {kind === 'REQUEST' && (
-            <Field label="Necessário em">
-              <Input
-                type="date"
-                {...register('neededAt', {
-                  setValueAs: (value) => value || null,
-                })}
-              />
-            </Field>
-          )}
-          <Field label="Observações / justificativa">
-            <Textarea {...register('notes')} />
-          </Field>
-        </div>
-        <h3 className="form-section-title">
-          {kind === 'INVENTORY' ? 'Quantidades contadas' : 'Itens do documento'}
-        </h3>
-        <p className="muted">
-          Use ponto para quantidades decimais, por exemplo 2.500. Salvar
-          rascunho não movimenta estoque.
-        </p>
-        {fields.map((field, index) => (
-          <div className="item-editor" key={field.id}>
-            <Field label="Material">
+            <Field label="Obra / origem">
               <FormSelect
                 required
                 control={control}
-                name={`items.${index}.materialId`}
+                name={'locationId'}
+                disabled={!!initial}
                 emptyLabel="Selecione"
-                options={props.materials
-                  .filter((m) => m.active)
-                  .map((m) => ({
-                    value: m.id,
-                    label: (
-                      <>
-                        {m.name} ({m.unit.code})
-                      </>
-                    ),
-                  }))}
+                options={props.locations
+                  .filter((l) => l.active)
+                  .map((l) => ({ value: l.id, label: <>{l.name}</> }))}
               />
             </Field>
-            <Field label={kind === 'INVENTORY' ? 'Contado' : 'Quantidade'}>
-              <Input
-                required
-                inputMode="decimal"
-                {...register(`items.${index}.quantity`)}
-              />
-            </Field>
-            {['ENTRY', 'INITIAL'].includes(kind) && (
-              <Field label="Custo unitário (R$)">
-                <Input
+            {kind === 'TRANSFER' && (
+              <Field label="Destino">
+                <FormSelect
                   required
-                  inputMode="decimal"
-                  {...register(`items.${index}.unitCost`)}
+                  control={control}
+                  name={'destinationId'}
+                  emptyLabel="Selecione"
+                  options={props.destinations
+                    .filter((l) => l.id !== locationId)
+                    .map((l) => ({ value: l.id, label: <>{l.name}</> }))}
                 />
               </Field>
             )}
-            <Button
-              type="button"
-              variant="outline"
-              disabled={fields.length === 1}
-              onClick={() => remove(index)}
-            >
-              Remover item
-            </Button>
+            {kind === 'ENTRY' && (
+              <Field label="Fornecedor">
+                <FormSelect
+                  required
+                  control={control}
+                  name={'supplierId'}
+                  emptyLabel="Selecione"
+                  options={applicable('SUPPLIER').map((c) => ({
+                    value: c.id,
+                    label: <>{c.name}</>,
+                  }))}
+                />
+              </Field>
+            )}
+            {['EXIT', 'REQUEST'].includes(kind) && (
+              <>
+                <Field label="Funcionário">
+                  <FormSelect
+                    required
+                    control={control}
+                    name={'employeeId'}
+                    emptyLabel="Selecione"
+                    options={applicable('EMPLOYEE').map((c) => ({
+                      value: c.id,
+                      label: <>{c.name}</>,
+                    }))}
+                  />
+                </Field>
+                <Field label="Centro de custo">
+                  <FormSelect
+                    required
+                    control={control}
+                    name={'costCenterId'}
+                    emptyLabel="Selecione"
+                    options={applicable('COST_CENTER').map((c) => ({
+                      value: c.id,
+                      label: <>{c.name}</>,
+                    }))}
+                  />
+                </Field>
+              </>
+            )}
+            <Field label="Documento / referência">
+              <Input {...register('reference')} />
+            </Field>
+            {kind === 'REQUEST' && (
+              <Field label="Necessário em">
+                <FormDatePicker control={control} name="neededAt" />
+              </Field>
+            )}
+            <Field label="Observações / justificativa">
+              <Textarea {...register('notes')} />
+            </Field>
           </div>
-        ))}
-        <Button
-          type="button"
-          variant="link"
-          className="mt-4 px-0"
-          onClick={() =>
-            append({ materialId: '', quantity: '1', unitCost: '0' })
-          }
-        >
-          + Adicionar material
-        </Button>
-        {Object.keys(errors).length > 0 && (
-          <p role="alert" className="form-error">
-            Revise os campos obrigatórios, a justificativa e as quantidades.
-            Materiais não podem se repetir.
+          <h3 className="form-section-title">
+            {kind === 'INVENTORY'
+              ? 'Quantidades contadas'
+              : 'Itens do documento'}
+          </h3>
+          <p className="muted">
+            Use ponto para quantidades decimais, por exemplo 2.500. Salvar
+            rascunho não movimenta estoque.
           </p>
-        )}
-        <MutationStatus mutation={mutation} />
-        <Button className="form-submit" disabled={mutation.isPending}>
-          Salvar rascunho
-        </Button>
-      </form>
-    </section>
+          {fields.map((field, index) => (
+            <div className="item-editor" key={field.id}>
+              <Field label="Material">
+                <FormSelect
+                  required
+                  control={control}
+                  name={`items.${index}.materialId`}
+                  emptyLabel="Selecione"
+                  options={props.materials
+                    .filter((m) => m.active)
+                    .map((m) => ({
+                      value: m.id,
+                      label: (
+                        <>
+                          {m.name} ({m.unit.code})
+                        </>
+                      ),
+                    }))}
+                />
+              </Field>
+              <Field label={kind === 'INVENTORY' ? 'Contado' : 'Quantidade'}>
+                <Input
+                  required
+                  inputMode="decimal"
+                  {...register(`items.${index}.quantity`)}
+                />
+              </Field>
+              {['ENTRY', 'INITIAL'].includes(kind) && (
+                <Field label="Custo unitário (R$)">
+                  <Input
+                    required
+                    inputMode="decimal"
+                    {...register(`items.${index}.unitCost`)}
+                  />
+                </Field>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                disabled={fields.length === 1}
+                onClick={() => remove(index)}
+              >
+                Remover item
+              </Button>
+            </div>
+          ))}
+          <Button
+            type="button"
+            variant="link"
+            className="mt-4 px-0"
+            onClick={() =>
+              append({ materialId: '', quantity: '1', unitCost: '0' })
+            }
+          >
+            + Adicionar material
+          </Button>
+          {Object.keys(errors).length > 0 && (
+            <FieldError>
+              Revise os campos obrigatórios, a justificativa e as quantidades.
+              Materiais não podem se repetir.
+            </FieldError>
+          )}
+          <MutationStatus mutation={mutation} />
+          <Button className="form-submit" disabled={mutation.isPending}>
+            Salvar rascunho
+          </Button>
+        </form>
+      </section>
+    </Card>
   );
 }
 
@@ -509,11 +512,7 @@ function DocumentActions({
           />
         </Field>
       )}
-      {fileError && (
-        <p role="alert" className="form-error">
-          {fileError}
-        </p>
-      )}
+      {fileError && <FieldError>{fileError}</FieldError>}
     </div>
   );
 }
@@ -580,12 +579,14 @@ export function OperationsPage(props: Props) {
         <span className="muted">{entries.length} documentos carregados</span>
       </div>
       {!entries.length && (
-        <section className="panel">
-          <EmptyState>
-            Nenhum documento encontrado. Cadastre os materiais e locais para
-            começar.
-          </EmptyState>
-        </section>
+        <Card asChild className="block gap-0">
+          <section className="panel">
+            <EmptyState>
+              Nenhum documento encontrado. Cadastre os materiais e locais para
+              começar.
+            </EmptyState>
+          </section>
+        </Card>
       )}
       {documents.hasNextPage && (
         <Button
@@ -597,100 +598,103 @@ export function OperationsPage(props: Props) {
         </Button>
       )}
       {entries.map((doc) => (
-        <section className="panel" key={doc.id}>
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">
-                {kindLabels[doc.kind]} #{doc.number} · {dateTime(doc.createdAt)}
-              </p>
-              <h2>
-                {doc.location.name}
-                {doc.destination && ` → ${doc.destination.name}`}
-              </h2>
+        <Card asChild className="block gap-0">
+          <section className="panel" key={doc.id}>
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">
+                  {kindLabels[doc.kind]} #{doc.number} ·{' '}
+                  {dateTime(doc.createdAt)}
+                </p>
+                <h2>
+                  {doc.location.name}
+                  {doc.destination && ` → ${doc.destination.name}`}
+                </h2>
+              </div>
+              <Badge
+                tone={
+                  ['DRAFT', 'SENT', 'PARTIAL', 'PENDING'].includes(doc.status)
+                    ? 'warning'
+                    : 'success'
+                }
+              >
+                {statusLabels[doc.status]}
+              </Badge>
             </div>
-            <Badge
-              tone={
-                ['DRAFT', 'SENT', 'PARTIAL', 'PENDING'].includes(doc.status)
-                  ? 'warning'
-                  : 'success'
-              }
-            >
-              {statusLabels[doc.status]}
-            </Badge>
-          </div>
-          {doc.notes && <p className="document-notes">{doc.notes}</p>}
-          <div className="table-scroll">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Material</TableHead>
-                  <TableHead>Quantidade</TableHead>
-                  {['TRANSFER', 'REQUEST'].includes(doc.kind) && (
-                    <>
-                      <TableHead>Recebido / atendido</TableHead>
-                      <TableHead>Devolvido / perdido</TableHead>
-                      <TableHead>Pendente</TableHead>
-                    </>
-                  )}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {doc.items.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.material.name}</TableCell>
-                    <TableCell>
-                      {number(item.quantity)} {item.material.unit.code}
-                    </TableCell>
+            {doc.notes && <p className="document-notes">{doc.notes}</p>}
+            <div className="table-scroll">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Material</TableHead>
+                    <TableHead>Quantidade</TableHead>
                     {['TRANSFER', 'REQUEST'].includes(doc.kind) && (
                       <>
-                        <TableCell>{number(item.completed)}</TableCell>
-                        <TableCell>
-                          {number(item.returned)} / {number(item.lost)}
-                        </TableCell>
-                        <TableCell>{number(pendingQuantity(item))}</TableCell>
+                        <TableHead>Recebido / atendido</TableHead>
+                        <TableHead>Devolvido / perdido</TableHead>
+                        <TableHead>Pendente</TableHead>
                       </>
                     )}
                   </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {doc.items.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{item.material.name}</TableCell>
+                      <TableCell>
+                        {number(item.quantity)} {item.material.unit.code}
+                      </TableCell>
+                      {['TRANSFER', 'REQUEST'].includes(doc.kind) && (
+                        <>
+                          <TableCell>{number(item.completed)}</TableCell>
+                          <TableCell>
+                            {number(item.returned)} / {number(item.lost)}
+                          </TableCell>
+                          <TableCell>{number(pendingQuantity(item))}</TableCell>
+                        </>
+                      )}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            {doc.corrections?.some((c) => c.kind === 'REVERSAL') && (
+              <FieldError>
+                Movimentação estornada por documento vinculado.
+              </FieldError>
+            )}
+            <DocumentActions
+              doc={doc}
+              actor={props.actor}
+              onEdit={() => setEditing(doc)}
+            />
+            {doc.attachments.length > 0 && (
+              <Disclosure title={`Comprovantes (${doc.attachments.length})`}>
+                {doc.attachments.map((file) => (
+                  <a
+                    key={file.id}
+                    className="text-link"
+                    href={`/api/attachments/${file.id}`}
+                  >
+                    {file.name}
+                  </a>
                 ))}
-              </TableBody>
-            </Table>
-          </div>
-          {doc.corrections?.some((c) => c.kind === 'REVERSAL') && (
-            <p className="form-error">
-              Movimentação estornada por documento vinculado.
-            </p>
-          )}
-          <DocumentActions
-            doc={doc}
-            actor={props.actor}
-            onEdit={() => setEditing(doc)}
-          />
-          {doc.events.length > 0 && (
-            <details className="history">
-              <summary>Comprovantes ({doc.attachments.length})</summary>
-              {doc.attachments.map((file) => (
-                <a
-                  key={file.id}
-                  className="text-link"
-                  href={`/api/attachments/${file.id}`}
-                >
-                  {file.name}
-                </a>
-              ))}
-            </details>
-          )}
-          {doc.events.length > 0 && (
-            <details className="history">
-              <summary>Histórico de conferências ({doc.events.length})</summary>
-              {doc.events.map((event) => (
-                <p key={event.id}>
-                  <strong>{dateTime(event.createdAt)}</strong> · {event.kind} ·{' '}
-                  {event.notes}
-                </p>
-              ))}
-            </details>
-          )}
-        </section>
+              </Disclosure>
+            )}
+            {doc.events.length > 0 && (
+              <Disclosure
+                title={`Histórico de conferências (${doc.events.length})`}
+              >
+                {doc.events.map((event) => (
+                  <p key={event.id}>
+                    <strong>{dateTime(event.createdAt)}</strong> · {event.kind}{' '}
+                    · {event.notes}
+                  </p>
+                ))}
+              </Disclosure>
+            )}
+          </section>
+        </Card>
       ))}
     </>
   );

@@ -18,6 +18,76 @@ async function chooseOption(page: Page, label: string, option: string) {
 
 let email: string;
 let password: string;
+
+test('abas por teclado, checkbox persistente e calendário em português', async ({
+  page,
+}, testInfo) => {
+  const suffix = randomUUID().slice(0, 8);
+  await page.goto('/');
+  await page.getByLabel('E-mail', { exact: true }).fill(email);
+  await page.getByLabel('Senha', { exact: true }).fill(password);
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  await page
+    .getByRole('link', { name: 'Cadastros', exact: true })
+    .first()
+    .click();
+  const firstTab = page.getByRole('tab', { name: 'Obras e depósitos' });
+  await firstTab.focus();
+  await firstTab.press('ArrowRight');
+  await expect(
+    page.getByRole('tab', { name: 'Grupos', exact: true }),
+  ).toHaveAttribute('aria-selected', 'true');
+  await page.getByRole('button', { name: 'Novo cadastro' }).click();
+  await page.getByLabel('Código', { exact: true }).fill(`UI-${suffix}`);
+  await page
+    .getByLabel('Nome', { exact: true })
+    .fill(`Grupo interface ${suffix}`);
+  await page.getByRole('checkbox', { name: 'Cadastro ativo' }).uncheck();
+  await page.getByRole('button', { name: 'Salvar cadastro' }).click();
+  const row = page
+    .getByRole('row')
+    .filter({ hasText: `Grupo interface ${suffix}` });
+  await expect(row).toContainText('Inativo');
+  await row.getByRole('button', { name: 'Editar', exact: true }).click();
+  await expect(
+    page.getByRole('checkbox', { name: 'Cadastro ativo' }),
+  ).not.toBeChecked();
+  await page.getByRole('checkbox', { name: 'Cadastro ativo' }).check();
+  await page.getByRole('button', { name: 'Salvar cadastro' }).click();
+  await expect(row).toContainText('Ativo');
+
+  await page.getByRole('link', { name: 'Relatórios', exact: true }).click();
+  await page.getByRole('button', { name: 'De', exact: true }).click();
+  const calendar = page.locator('[data-slot="calendar"]');
+  await expect(calendar).toBeVisible();
+  await expect(
+    calendar.getByRole('button', { name: 'Próximo mês' }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: `artifacts/calendar-${testInfo.project.name}.png`,
+  });
+  const selectedDate = await page.evaluate(() => {
+    const current = new Date();
+    return `15/${String(current.getMonth() + 1).padStart(2, '0')}/${current.getFullYear()}`;
+  });
+  await calendar
+    .locator('button[data-day]')
+    .filter({ hasText: /^15$/ })
+    .click();
+  await expect(
+    page.getByRole('button', { name: 'De', exact: true }),
+  ).toHaveText(selectedDate);
+  await page.getByRole('button', { name: 'De', exact: true }).click();
+  await page.getByRole('button', { name: 'Limpar data' }).click();
+  await expect(
+    page.getByRole('button', { name: 'De', exact: true }),
+  ).toHaveText('Selecione a data');
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+});
 test.beforeAll(async () => {
   const id = randomUUID();
   email = `${id}@example.test`;
@@ -143,6 +213,16 @@ test('transferência com conferência parcial e bloqueio de excesso pela interfa
     .fill('18');
   await doc.getByRole('button', { name: 'Concluir operação' }).click();
   await expect(doc.getByText('Parcial', { exact: true })).toBeVisible();
+  const history = doc.getByRole('button', {
+    name: /Histórico de conferências/,
+  });
+  await history.click();
+  await expect(history).toHaveAttribute('aria-expanded', 'true');
+  await expect(
+    doc.getByText('Conferência física dos materiais', { exact: false }),
+  ).toBeVisible();
+  await history.click();
+  await expect(history).toHaveAttribute('aria-expanded', 'false');
   await page.screenshot({
     path: `artifacts/transfer-${testInfo.project.name}.png`,
     fullPage: true,
@@ -182,7 +262,7 @@ test('login, cadastro persistente e movimentação real pelo navegador', async (
     page.getByRole('cell', { name: `Obra ${suffix}`, exact: true }),
   ).toBeVisible();
   for (const tab of ['Grupos', 'Unidades']) {
-    await page.getByRole('button', { name: tab, exact: true }).click();
+    await page.getByRole('tab', { name: tab, exact: true }).click();
     await page
       .getByRole('button', { name: 'Novo cadastro', exact: true })
       .click();

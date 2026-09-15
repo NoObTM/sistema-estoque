@@ -1,5 +1,8 @@
+import { InfoMessage } from '@/components/forms';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/date-picker';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Table,
   TableHeader,
@@ -143,89 +146,86 @@ export function ReportsPage({ locationId }: { locationId: string }) {
         }
       />
       <div className="filters">
-        <Field label="De">
-          <Input
-            type="date"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-          />
+        <Field label="De" className="w-auto min-w-44">
+          <DatePicker value={from} onValueChange={setFrom} />
         </Field>
-        <Field label="Até">
-          <Input
-            type="date"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-          />
+        <Field label="Até" className="w-auto min-w-44">
+          <DatePicker value={to} onValueChange={setTo} />
         </Field>
       </div>
-      <div className="tabs">
-        {[
-          ['stock', 'Saldos atuais'],
-          ['transit', 'Materiais em trânsito'],
-          ['consumption', 'Consumo por centro de custo'],
-          ['ledger', 'Histórico de movimentações'],
-        ].map(([id, label]) => (
-          <Button
-            variant="ghost"
-            key={id}
-            className={tab === id ? 'selected' : ''}
-            onClick={() => setTab(id!)}
-          >
-            {label}
-          </Button>
-        ))}
-      </div>
-      <section className="panel">
-        <div className="section-heading">
-          <h2>
-            {tab === 'stock'
-              ? `Valor disponível: ${money(report.data.totalValue)}`
-              : tab === 'consumption'
-                ? 'Saídas de consumo por centro de custo'
-                : tab === 'transit'
-                  ? 'Pendências entre obras'
-                  : 'Lançamentos do período'}
-          </h2>
-        </div>
-        <div className="table-scroll">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {rows[0]!.map((label) => (
-                  <TableHead key={label}>{label}</TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.slice(1).map((row, i) => (
-                <TableRow key={i}>
-                  {row.map((value, j) => (
-                    <TableCell key={j}>
-                      {typeof value === 'number' ? number(value) : value}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        {tab === 'ledger' && ledger.hasNextPage && (
-          <div className="info-note">
-            Há mais registros. Carregue os lançamentos desejados antes de
-            exportar ou imprimir.{' '}
-            <Button
-              variant="outline"
-              disabled={ledger.isFetchingNextPage}
-              onClick={() => void ledger.fetchNextPage()}
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList className="section-tabs w-full justify-start overflow-x-auto">
+          {[
+            ['stock', 'Saldos atuais'],
+            ['transit', 'Materiais em trânsito'],
+            ['consumption', 'Consumo por centro de custo'],
+            ['ledger', 'Histórico de movimentações'],
+          ].map(([id, label]) => (
+            <TabsTrigger
+              className="shrink-0 flex-none data-[state=active]:bg-primary data-[state=active]:text-white"
+              key={id}
+              value={id!}
             >
-              Carregar mais lançamentos
-            </Button>
-          </div>
-        )}
-        {rows.length === 1 && (
-          <EmptyState>Nenhum registro no período selecionado.</EmptyState>
-        )}
-      </section>
+              {label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <TabsContent value={tab}>
+          <Card asChild className="block gap-0">
+            <section className="panel">
+              <div className="section-heading">
+                <h2>
+                  {tab === 'stock'
+                    ? `Valor disponível: ${money(report.data.totalValue)}`
+                    : tab === 'consumption'
+                      ? 'Saídas de consumo por centro de custo'
+                      : tab === 'transit'
+                        ? 'Pendências entre obras'
+                        : 'Lançamentos do período'}
+                </h2>
+              </div>
+              <div className="table-scroll">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {rows[0]!.map((label) => (
+                        <TableHead key={label}>{label}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rows.slice(1).map((row, i) => (
+                      <TableRow key={i}>
+                        {row.map((value, j) => (
+                          <TableCell key={j}>
+                            {typeof value === 'number' ? number(value) : value}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              {tab === 'ledger' && ledger.hasNextPage && (
+                <InfoMessage>
+                  Há mais registros. Carregue os lançamentos desejados antes de
+                  exportar ou imprimir.{' '}
+                  <Button
+                    variant="outline"
+                    disabled={ledger.isFetchingNextPage}
+                    onClick={() => void ledger.fetchNextPage()}
+                  >
+                    Carregar mais lançamentos
+                  </Button>
+                </InfoMessage>
+              )}
+              {rows.length === 1 && (
+                <EmptyState>Nenhum registro no período selecionado.</EmptyState>
+              )}
+            </section>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </>
   );
 }

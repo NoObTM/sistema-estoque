@@ -1,7 +1,19 @@
 import { SelectInput } from '@/components/select-input';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import { NavLink, Route, Routes } from 'react-router';
+import { NavLink, Route, Routes, useLocation } from 'react-router';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Label } from '@/components/ui/label';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from '@/components/ui/sidebar';
 import {
   Boxes,
   Building2,
@@ -51,6 +63,7 @@ export function App() {
   return <Workspace actor={me.data!} />;
 }
 function Workspace({ actor }: { actor: Actor }) {
+  const { pathname } = useLocation();
   const [locationId, setLocationId] = useState('');
   const locations = useData<Location[]>('/locations');
   const catalogs = useData<Catalog[]>('/catalogs');
@@ -105,38 +118,62 @@ function Workspace({ actor }: { actor: Actor }) {
       : []),
   ];
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <NavLink className="brand" to="/">
-          <span className="brand-mark">
-            <Building2 size={27} />
-          </span>
-          <span>
-            obra<span className="brand-light">estoque</span>
-            <small>CONTROLE QUE CONSTRÓI</small>
-          </span>
-        </NavLink>
-        <p className="nav-caption">ÁREA DE TRABALHO</p>
-        <nav aria-label="Navegação principal">
-          {links.map(({ to, label, icon: Icon }) => (
-            <NavLink key={to} to={to} end={to === '/'}>
-              <Icon size={18} />
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-        <div className="sidebar-footer">
-          <span className="avatar">{actor.name.slice(0, 2).toUpperCase()}</span>
+    <SidebarProvider className="app-shell max-[700px]:block">
+      <Sidebar
+        collapsible="none"
+        className="sidebar h-screen w-[240px] max-[1150px]:w-[205px] max-[700px]:h-auto max-[700px]:w-full"
+      >
+        <SidebarHeader className="p-0">
+          <NavLink className="brand" to="/">
+            <span className="brand-mark">
+              <Building2 size={27} />
+            </span>
+            <span>
+              obra<span className="brand-light">estoque</span>
+              <small>CONTROLE QUE CONSTRÓI</small>
+            </span>
+          </NavLink>
+          <p className="nav-caption">ÁREA DE TRABALHO</p>
+        </SidebarHeader>
+        <SidebarContent>
+          <nav aria-label="Navegação principal">
+            <SidebarMenu className="max-[700px]:flex-row">
+              {links.map(({ to, label, icon: Icon }) => (
+                <SidebarMenuItem
+                  key={to}
+                  className="max-[700px]:w-auto max-[700px]:shrink-0"
+                >
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === to}
+                    className="h-auto py-3"
+                  >
+                    <NavLink to={to} end={to === '/'}>
+                      <Icon size={18} />
+                      {label}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </nav>
+        </SidebarContent>
+        <SidebarFooter className="sidebar-footer flex-row px-0 max-[700px]:hidden">
+          <Avatar>
+            <AvatarFallback className="bg-sidebar-accent text-sidebar-foreground">
+              {actor.name.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
           <div>
             <strong>{actor.name}</strong>
             <small>{roleLabels[actor.role]}</small>
           </div>
-        </div>
-      </aside>
+        </SidebarFooter>
+      </Sidebar>
       <div className="workspace">
         <header className="topbar">
           <div className="breadcrumb">Gestão de materiais</div>
-          <label className="location-selector">
+          <Label className="location-selector">
             <Building2 size={18} />
             <span className="sr-only">Obra ou depósito</span>
             <SelectInput
@@ -149,7 +186,7 @@ function Workspace({ actor }: { actor: Actor }) {
                 label: <>{l.name}</>,
               }))}
             />
-          </label>
+          </Label>
           <Button
             variant="outline"
             onClick={async () => {
@@ -240,6 +277,6 @@ function Workspace({ actor }: { actor: Actor }) {
           </footer>
         </main>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

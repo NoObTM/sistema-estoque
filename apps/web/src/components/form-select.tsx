@@ -5,6 +5,7 @@ import {
   type FieldValues,
 } from 'react-hook-form';
 import { SelectInput, type SelectInputProps } from './select-input';
+import { FieldError } from './ui/field';
 
 interface FormSelectProps<T extends FieldValues> extends Omit<
   SelectInputProps,
@@ -45,9 +46,7 @@ export function FormSelect<T extends FieldValues>({
         }
       />
       {fieldState.error && (
-        <p id={errorId} className="text-sm text-destructive" role="alert">
-          {fieldState.error.message}
-        </p>
+        <FieldError id={errorId}>{fieldState.error.message}</FieldError>
       )}
     </>
   );

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Badge as StatusBadge } from './ui/badge';
+import { Empty, EmptyDescription } from './ui/empty';
 
 export function PageHeading({
   eyebrow,
@@ -39,7 +40,11 @@ export function Badge({
 }
 
 export function EmptyState({ children }: { children: ReactNode }) {
-  return <p className="empty-state">{children}</p>;
+  return (
+    <Empty>
+      <EmptyDescription>{children}</EmptyDescription>
+    </Empty>
+  );
 }
 
 const quantityFormatter = new Intl.NumberFormat('pt-BR', {

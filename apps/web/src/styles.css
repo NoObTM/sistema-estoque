@@ -1,6 +1,16 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:is(.dark *));
+
 @theme inline {
+  --color-sidebar: var(--primary);
+  --color-sidebar-foreground: #e5f3f5;
+  --color-sidebar-primary: var(--accent);
+  --color-sidebar-primary-foreground: var(--primary);
+  --color-sidebar-accent: #247286;
+  --color-sidebar-accent-foreground: #ffffff;
+  --color-sidebar-border: #286778;
+  --color-sidebar-ring: var(--accent);
   --color-background: var(--background);
   --color-card: var(--card);
   --color-popover: var(--card);
@@ -28,6 +38,34 @@
 }
 
 @layer components {
+  .section-tabs {
+    width: 100%;
+    height: auto;
+    justify-content: flex-start;
+    overflow-x: auto;
+    margin-bottom: 20px;
+  }
+  .section-tabs [data-slot='tabs-trigger'] {
+    flex: none;
+    padding: 10px 16px;
+  }
+  .section-tabs [data-state='active'] {
+    background: var(--primary);
+    color: white;
+  }
+  .app-shell [data-slot='sidebar-content'] {
+    min-height: 0;
+  }
+  [data-slot='calendar'] table {
+    white-space: normal;
+  }
+  [data-slot='calendar'] th,
+  [data-slot='calendar'] td {
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
   .app-shell .sidebar {
     background: linear-gradient(165deg, #004d61 25%, #176e80 100%);
   }
@@ -156,18 +194,7 @@
     overflow: auto;
     margin-bottom: 24px;
   }
-  .tabs button {
-    border: 1px solid #dce6e8;
-    border-radius: 7px;
-    padding: 11px 16px;
-    white-space: nowrap;
-    font-size: 12px;
-    background: #fff;
-  }
-  .tabs .selected {
-    background: #004d61;
-    color: white;
-  }
+
   .filters {
     display: flex;
     align-items: end;
@@ -335,7 +362,7 @@
     .topbar,
     .page-footer,
     .page-heading > .actions-row,
-    .tabs,
+    .section-tabs,
     .filters {
       display: none !important;
     }

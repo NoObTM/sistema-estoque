@@ -1,5 +1,9 @@
+import { Card } from '@/components/ui/card';
 import { FormSelect } from '@/components/form-select';
 import { Button } from '@/components/ui/button';
+import { FormCheckbox } from '@/components/form-checkbox';
+import { FieldError } from '@/components/ui/field';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import {
@@ -51,93 +55,95 @@ function Editor({
   const mutation = useCommand();
   const [photoError, setPhotoError] = useState('');
   return (
-    <section className="panel">
-      <div className="section-heading">
-        <h2>{initial.id ? 'Editar cadastro' : 'Novo cadastro'}</h2>
-        <Button variant="outline" onClick={onClose}>
-          Fechar
-        </Button>
-      </div>
-      <form
-        onSubmit={handleSubmit(async (values) => {
-          const body = { ...values };
-          delete body.id;
-          if ('locationId' in body) body.locationId = body.locationId || null;
-          if ('barcode' in body) body.barcode = body.barcode || null;
-          await mutation
-            .mutateAsync({
-              path: `${path}${initial.id ? `/${initial.id}` : ''}`,
-              method: initial.id ? 'PUT' : 'POST',
-              body,
-            })
-            .then(onClose)
-            .catch(() => {});
-        })}
-      >
-        <div className="form-grid columns">
-          {fields.map((field) => (
-            <Field key={field.name} label={field.label}>
-              {field.options ? (
-                <FormSelect
-                  required={field.required}
-                  control={control}
-                  name={field.name}
-                  emptyLabel="Selecione"
-                  options={field.options.map((option) => ({
-                    value: option.id,
-                    label: <>{option.name}</>,
-                  }))}
-                />
-              ) : field.type === 'checkbox' ? (
-                <input type="checkbox" {...register(field.name)} />
-              ) : field.type === 'textarea' ? (
-                <Textarea {...register(field.name)} />
-              ) : (
-                <Input
-                  required={field.required}
-                  type={field.type ?? 'text'}
-                  {...register(field.name)}
-                />
-              )}
-            </Field>
-          ))}
-          {'photo' in initial && (
-            <Field label="Foto do material (até 1 MB)">
-              <Input
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                onChange={async (event) => {
-                  const file = event.target.files?.[0];
-                  if (!file) return;
-                  if (file.size > 1_000_000) {
-                    setPhotoError('Escolha uma imagem de até 1 MB.');
-                    return;
-                  }
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    setValue('photo', String(reader.result));
-                    setPhotoError('');
-                  };
-                  reader.readAsDataURL(file);
-                }}
-              />
-              <Button
-                variant="ghost"
-                type="button"
-                onClick={() => setValue('photo', null)}
-              >
-                Remover foto
-              </Button>
-              {photoError && <span role="alert">{photoError}</span>}
-            </Field>
-          )}
+    <Card asChild className="block gap-0">
+      <section className="panel">
+        <div className="section-heading">
+          <h2>{initial.id ? 'Editar cadastro' : 'Novo cadastro'}</h2>
+          <Button variant="outline" onClick={onClose}>
+            Fechar
+          </Button>
         </div>
-        <MutationStatus mutation={mutation} />
-        <Button className="form-submit" disabled={mutation.isPending}>
-          Salvar cadastro
-        </Button>
-      </form>
-    </section>
+        <form
+          onSubmit={handleSubmit(async (values) => {
+            const body = { ...values };
+            delete body.id;
+            if ('locationId' in body) body.locationId = body.locationId || null;
+            if ('barcode' in body) body.barcode = body.barcode || null;
+            await mutation
+              .mutateAsync({
+                path: `${path}${initial.id ? `/${initial.id}` : ''}`,
+                method: initial.id ? 'PUT' : 'POST',
+                body,
+              })
+              .then(onClose)
+              .catch(() => {});
+          })}
+        >
+          <div className="form-grid columns">
+            {fields.map((field) => (
+              <Field key={field.name} label={field.label}>
+                {field.options ? (
+                  <FormSelect
+                    required={field.required}
+                    control={control}
+                    name={field.name}
+                    emptyLabel="Selecione"
+                    options={field.options.map((option) => ({
+                      value: option.id,
+                      label: <>{option.name}</>,
+                    }))}
+                  />
+                ) : field.type === 'checkbox' ? (
+                  <FormCheckbox control={control} name={field.name} />
+                ) : field.type === 'textarea' ? (
+                  <Textarea {...register(field.name)} />
+                ) : (
+                  <Input
+                    required={field.required}
+                    type={field.type ?? 'text'}
+                    {...register(field.name)}
+                  />
+                )}
+              </Field>
+            ))}
+            {'photo' in initial && (
+              <Field label="Foto do material (até 1 MB)">
+                <Input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={async (event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+                    if (file.size > 1_000_000) {
+                      setPhotoError('Escolha uma imagem de até 1 MB.');
+                      return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setValue('photo', String(reader.result));
+                      setPhotoError('');
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                />
+                <Button
+                  variant="ghost"
+                  type="button"
+                  onClick={() => setValue('photo', null)}
+                >
+                  Remover foto
+                </Button>
+                {photoError && <FieldError>{photoError}</FieldError>}
+              </Field>
+            )}
+          </div>
+          <MutationStatus mutation={mutation} />
+          <Button className="form-submit" disabled={mutation.isPending}>
+            Salvar cadastro
+          </Button>
+        </form>
+      </section>
+    </Card>
   );
 }
 
@@ -226,90 +232,98 @@ export function CatalogsPage({
         title="Cadastros"
         description="Organize as obras, as pessoas e as classificações dos materiais."
       />
-      <div className="tabs">
-        {[
-          ['LOCATION', 'Obras e depósitos'],
-          ...Object.entries(catalogLabels),
-        ].map(([key, label]) => (
-          <Button
-            variant="ghost"
-            key={key}
-            className={tab === key ? 'selected' : ''}
-            onClick={() => {
-              setTab(key!);
-              setEditing(null);
-            }}
-          >
-            {label}
-          </Button>
-        ))}
-      </div>
-      {editing && (
-        <Editor
-          key={`${tab}-${editing.id ?? 'new'}`}
-          path={tab === 'LOCATION' ? '/locations' : '/catalogs'}
-          initial={editing}
-          fields={fields}
-          onClose={() => setEditing(null)}
-        />
-      )}
-      <section className="panel">
-        <div className="section-heading">
-          <Input
-            aria-label="Buscar cadastro"
-            placeholder="Buscar por código ou nome"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          {canEdit && (
-            <Button variant="highlight" onClick={() => openEditor()}>
-              Novo cadastro
-            </Button>
+      <Tabs
+        value={tab}
+        onValueChange={(value) => {
+          setTab(value);
+          setEditing(null);
+        }}
+      >
+        <TabsList className="section-tabs w-full justify-start overflow-x-auto">
+          {[
+            ['LOCATION', 'Obras e depósitos'],
+            ...Object.entries(catalogLabels),
+          ].map(([key, label]) => (
+            <TabsTrigger
+              className="shrink-0 flex-none data-[state=active]:bg-primary data-[state=active]:text-white"
+              key={key}
+              value={key!}
+            >
+              {label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <TabsContent value={tab}>
+          {editing && (
+            <Editor
+              key={`${tab}-${editing.id ?? 'new'}`}
+              path={tab === 'LOCATION' ? '/locations' : '/catalogs'}
+              initial={editing}
+              fields={fields}
+              onClose={() => setEditing(null)}
+            />
           )}
-        </div>
-        <div className="table-scroll">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Código</TableHead>
-                <TableHead>Nome</TableHead>
-                <TableHead>Situação</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {entries.map((entry) => (
-                <TableRow key={entry.id}>
-                  <TableCell>{entry.code}</TableCell>
-                  <TableCell>{entry.name}</TableCell>
-                  <TableCell>
-                    <Badge tone={entry.active ? 'success' : 'neutral'}>
-                      {entry.active ? 'Ativo' : 'Inativo'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {canEdit && (
-                      <Button
-                        variant="link"
-                        className="mt-4 px-0"
-                        onClick={() => openEditor(entry)}
-                      >
-                        Editar
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        {!entries.length && (
-          <EmptyState>
-            Nenhum cadastro encontrado. Comece cadastrando seus locais, grupos e
-            unidades.
-          </EmptyState>
-        )}
-      </section>
+          <Card asChild className="block gap-0">
+            <section className="panel">
+              <div className="section-heading">
+                <Input
+                  aria-label="Buscar cadastro"
+                  placeholder="Buscar por código ou nome"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                {canEdit && (
+                  <Button variant="highlight" onClick={() => openEditor()}>
+                    Novo cadastro
+                  </Button>
+                )}
+              </div>
+              <div className="table-scroll">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Código</TableHead>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>Situação</TableHead>
+                      <TableHead>Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {entries.map((entry) => (
+                      <TableRow key={entry.id}>
+                        <TableCell>{entry.code}</TableCell>
+                        <TableCell>{entry.name}</TableCell>
+                        <TableCell>
+                          <Badge tone={entry.active ? 'success' : 'neutral'}>
+                            {entry.active ? 'Ativo' : 'Inativo'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {canEdit && (
+                            <Button
+                              variant="link"
+                              className="mt-4 px-0"
+                              onClick={() => openEditor(entry)}
+                            >
+                              Editar
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              {!entries.length && (
+                <EmptyState>
+                  Nenhum cadastro encontrado. Comece cadastrando seus locais,
+                  grupos e unidades.
+                </EmptyState>
+              )}
+            </section>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </>
   );
 }
@@ -397,70 +411,72 @@ export function MaterialsPage({
           onClose={() => setEditing(null)}
         />
       )}
-      <section className="panel">
-        <Input
-          className="search"
-          aria-label="Buscar material"
-          placeholder="Nome, código, grupo ou código de barras"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <div className="table-scroll">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Material</TableHead>
-                <TableHead>Grupo</TableHead>
-                <TableHead>Unidade</TableHead>
-                <TableHead>Situação</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {entries.map((material) => (
-                <TableRow key={material.id}>
-                  <TableCell>
-                    <div className="material-cell">
-                      {material.photo && <img src={material.photo} alt="" />}
-                      <div>
-                        <strong>{material.name}</strong>
-                        <small>{material.code}</small>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{material.group.name}</TableCell>
-                  <TableCell>{material.unit.code}</TableCell>
-                  <TableCell>
-                    <Badge>{material.active ? 'Ativo' : 'Inativo'}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    {actor.role === 'ADMIN' && (
-                      <Button
-                        variant="link"
-                        className="mt-4 px-0"
-                        onClick={() => {
-                          const { group, unit, ...values } = material;
-                          void group;
-                          void unit;
-                          setEditing(values);
-                        }}
-                      >
-                        Editar
-                      </Button>
-                    )}
-                  </TableCell>
+      <Card asChild className="block gap-0">
+        <section className="panel">
+          <Input
+            className="search"
+            aria-label="Buscar material"
+            placeholder="Nome, código, grupo ou código de barras"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="table-scroll">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Material</TableHead>
+                  <TableHead>Grupo</TableHead>
+                  <TableHead>Unidade</TableHead>
+                  <TableHead>Situação</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        {!entries.length && (
-          <EmptyState>
-            Nenhum material encontrado. Cadastre grupos e unidades antes do
-            primeiro material.
-          </EmptyState>
-        )}
-      </section>
+              </TableHeader>
+              <TableBody>
+                {entries.map((material) => (
+                  <TableRow key={material.id}>
+                    <TableCell>
+                      <div className="material-cell">
+                        {material.photo && <img src={material.photo} alt="" />}
+                        <div>
+                          <strong>{material.name}</strong>
+                          <small>{material.code}</small>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{material.group.name}</TableCell>
+                    <TableCell>{material.unit.code}</TableCell>
+                    <TableCell>
+                      <Badge>{material.active ? 'Ativo' : 'Inativo'}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      {actor.role === 'ADMIN' && (
+                        <Button
+                          variant="link"
+                          className="mt-4 px-0"
+                          onClick={() => {
+                            const { group, unit, ...values } = material;
+                            void group;
+                            void unit;
+                            setEditing(values);
+                          }}
+                        >
+                          Editar
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          {!entries.length && (
+            <EmptyState>
+              Nenhum material encontrado. Cadastre grupos e unidades antes do
+              primeiro material.
+            </EmptyState>
+          )}
+        </section>
+      </Card>
     </>
   );
 }

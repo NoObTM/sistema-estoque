@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { FormSelect } from '@/components/form-select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -61,18 +62,20 @@ export function OverviewPage({
   );
   if (actor.role === 'REQUESTER')
     return (
-      <section className="panel">
-        <h1>Suas solicitações de materiais</h1>
-        <p>
-          Acompanhe o estoque autorizado e solicite os itens necessários para a
-          obra.
-        </p>
-        <Button asChild variant="highlight" className="form-submit">
-          <Link to="/requisicoes">
-            Abrir requisições <ArrowRight />
-          </Link>
-        </Button>
-      </section>
+      <Card asChild className="block gap-0">
+        <section className="panel">
+          <h1>Suas solicitações de materiais</h1>
+          <p>
+            Acompanhe o estoque autorizado e solicite os itens necessários para
+            a obra.
+          </p>
+          <Button asChild variant="highlight" className="form-submit">
+            <Link to="/requisicoes">
+              Abrir requisições <ArrowRight />
+            </Link>
+          </Button>
+        </section>
+      </Card>
     );
   if (query.isPending) return <Loading />;
   if (query.error)
@@ -121,69 +124,75 @@ export function OverviewPage({
             tone: 'secondary',
           },
         ].map(({ label, value, icon: Icon, tone }) => (
-          <article className={`metric metric-${tone}`} key={label}>
-            <div className="metric-label">
-              {label}
-              <span className="metric-icon">
-                <Icon size={20} aria-hidden="true" />
-              </span>
-            </div>
-            <strong className="metric-value">{value}</strong>
-          </article>
+          <Card asChild className="block gap-0">
+            <article className={`metric metric-${tone}`} key={label}>
+              <div className="metric-label">
+                {label}
+                <span className="metric-icon">
+                  <Icon size={20} aria-hidden="true" />
+                </span>
+              </div>
+              <strong className="metric-value">{value}</strong>
+            </article>
+          </Card>
         ))}
       </div>
-      <section className="panel replenishment-panel">
-        <div className="section-heading">
-          <h2>
-            <span className="section-dot" />
-            Reposição de materiais
-          </h2>
-          <Link className="text-link" to="/estoque">
-            Consultar saldos
-          </Link>
-        </div>
-        {report.stock
-          .filter((s) => s.low)
-          .map((stock) => (
-            <div className="list-row" key={stock.id}>
-              <div>
-                <strong>{stock.material.name}</strong>
-                <small>{stock.location.name}</small>
-              </div>
-              <Badge tone="warning">
-                {number(stock.quantity)} / mínimo {number(stock.minimum)}{' '}
-                {stock.material.unit.code}
-              </Badge>
-            </div>
-          ))}
-        {!report.lowCount && (
-          <EmptyState>
-            Nenhum material abaixo do mínimo. Configure os parâmetros de
-            reposição em Estoque por obra.
-          </EmptyState>
-        )}
-      </section>
-      <section className="panel operation-start">
-        <Boxes className="operation-icon" size={32} aria-hidden="true" />
-        <h2>Comece pela organização da operação</h2>
-        <p className="document-notes">
-          Cadastre obras, grupos e unidades. Depois inclua os materiais e
-          registre os saldos iniciais ou entradas.
-        </p>
-        <div className="actions-row">
-          <Button asChild variant="outline">
-            <Link to="/cadastros">Cadastros</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link to="/materiais">Materiais</Link>
-          </Button>
-          <Button asChild variant="highlight">
-            <Link to="/movimentacoes">
-              Entradas e saídas <ArrowRight />
+      <Card asChild className="block gap-0">
+        <section className="panel replenishment-panel">
+          <div className="section-heading">
+            <h2>
+              <span className="section-dot" />
+              Reposição de materiais
+            </h2>
+            <Link className="text-link" to="/estoque">
+              Consultar saldos
             </Link>
-          </Button>
-        </div>
-      </section>
+          </div>
+          {report.stock
+            .filter((s) => s.low)
+            .map((stock) => (
+              <div className="list-row" key={stock.id}>
+                <div>
+                  <strong>{stock.material.name}</strong>
+                  <small>{stock.location.name}</small>
+                </div>
+                <Badge tone="warning">
+                  {number(stock.quantity)} / mínimo {number(stock.minimum)}{' '}
+                  {stock.material.unit.code}
+                </Badge>
+              </div>
+            ))}
+          {!report.lowCount && (
+            <EmptyState>
+              Nenhum material abaixo do mínimo. Configure os parâmetros de
+              reposição em Estoque por obra.
+            </EmptyState>
+          )}
+        </section>
+      </Card>
+      <Card asChild className="block gap-0">
+        <section className="panel operation-start">
+          <Boxes className="operation-icon" size={32} aria-hidden="true" />
+          <h2>Comece pela organização da operação</h2>
+          <p className="document-notes">
+            Cadastre obras, grupos e unidades. Depois inclua os materiais e
+            registre os saldos iniciais ou entradas.
+          </p>
+          <div className="actions-row">
+            <Button asChild variant="outline">
+              <Link to="/cadastros">Cadastros</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/materiais">Materiais</Link>
+            </Button>
+            <Button asChild variant="highlight">
+              <Link to="/movimentacoes">
+                Entradas e saídas <ArrowRight />
+              </Link>
+            </Button>
+          </div>
+        </section>
+      </Card>
     </>
   );
 }
@@ -217,62 +226,64 @@ function StockSettings({
   });
   const mutation = useCommand();
   return (
-    <section className="panel">
-      <h2>Parâmetros de reposição</h2>
-      <form
-        onSubmit={handleSubmit(async (body) => {
-          await mutation
-            .mutateAsync({ path: '/stocks/settings', body })
-            .then(onClose)
-            .catch(() => {});
-        })}
-      >
-        <div className="form-grid columns">
-          <Field label="Obra">
-            <FormSelect
-              required
-              control={control}
-              name={'locationId'}
-              disabled={!!stock}
-              emptyLabel="Selecione"
-              options={locations.map((l) => ({
-                value: l.id,
-                label: <>{l.name}</>,
-              }))}
-            />
-          </Field>
-          <Field label="Material">
-            <FormSelect
-              required
-              control={control}
-              name={'materialId'}
-              disabled={!!stock}
-              emptyLabel="Selecione"
-              options={materials.map((m) => ({
-                value: m.id,
-                label: <>{m.name}</>,
-              }))}
-            />
-          </Field>
-          <Field label="Estoque mínimo">
-            <Input required {...register('minimum')} />
-          </Field>
-          <Field label="Estoque ideal">
-            <Input required {...register('ideal')} />
-          </Field>
-          <Field label="Localização física">
-            <Input {...register('address')} />
-          </Field>
-        </div>
-        <MutationStatus mutation={mutation} />
-        <div className="actions-row">
-          <Button disabled={mutation.isPending}>Salvar parâmetros</Button>
-          <Button type="button" variant="outline" onClick={onClose}>
-            Fechar
-          </Button>
-        </div>
-      </form>
-    </section>
+    <Card asChild className="block gap-0">
+      <section className="panel">
+        <h2>Parâmetros de reposição</h2>
+        <form
+          onSubmit={handleSubmit(async (body) => {
+            await mutation
+              .mutateAsync({ path: '/stocks/settings', body })
+              .then(onClose)
+              .catch(() => {});
+          })}
+        >
+          <div className="form-grid columns">
+            <Field label="Obra">
+              <FormSelect
+                required
+                control={control}
+                name={'locationId'}
+                disabled={!!stock}
+                emptyLabel="Selecione"
+                options={locations.map((l) => ({
+                  value: l.id,
+                  label: <>{l.name}</>,
+                }))}
+              />
+            </Field>
+            <Field label="Material">
+              <FormSelect
+                required
+                control={control}
+                name={'materialId'}
+                disabled={!!stock}
+                emptyLabel="Selecione"
+                options={materials.map((m) => ({
+                  value: m.id,
+                  label: <>{m.name}</>,
+                }))}
+              />
+            </Field>
+            <Field label="Estoque mínimo">
+              <Input required {...register('minimum')} />
+            </Field>
+            <Field label="Estoque ideal">
+              <Input required {...register('ideal')} />
+            </Field>
+            <Field label="Localização física">
+              <Input {...register('address')} />
+            </Field>
+          </div>
+          <MutationStatus mutation={mutation} />
+          <div className="actions-row">
+            <Button disabled={mutation.isPending}>Salvar parâmetros</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Fechar
+            </Button>
+          </div>
+        </form>
+      </section>
+    </Card>
   );
 }
 export function StockOverview({
@@ -325,78 +336,80 @@ export function StockOverview({
           onClose={() => setEditing(null)}
         />
       )}
-      <section className="panel">
-        <Input
-          className="search"
-          aria-label="Buscar saldo"
-          placeholder="Buscar material"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <div className="table-scroll">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Material / obra</TableHead>
-                <TableHead>Localização</TableHead>
-                <TableHead>Disponível</TableHead>
-                <TableHead>Mínimo / ideal</TableHead>
-                <TableHead>Custo médio</TableHead>
-                <TableHead>Situação</TableHead>
-                {canEdit && <TableHead>Ações</TableHead>}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((s) => (
-                <TableRow key={s.id}>
-                  <TableCell>
-                    <strong>{s.material.name}</strong>
-                    <small>{s.location.name}</small>
-                  </TableCell>
-                  <TableCell>{s.address || 'A definir'}</TableCell>
-                  <TableCell>
-                    {number(s.quantity)} {s.material.unit.code}
-                  </TableCell>
-                  <TableCell>
-                    {number(s.minimum)} / {number(s.ideal)}
-                  </TableCell>
-                  <TableCell>{money(s.averageCost)}</TableCell>
-                  <TableCell>
-                    <Badge
-                      tone={
-                        toMilliunits(s.quantity) < toMilliunits(s.minimum)
-                          ? 'warning'
-                          : 'success'
-                      }
-                    >
-                      {toMilliunits(s.quantity) < toMilliunits(s.minimum)
-                        ? 'Abaixo do mínimo'
-                        : 'Regular'}
-                    </Badge>
-                  </TableCell>
-                  {canEdit && (
-                    <TableCell>
-                      <Button
-                        variant="link"
-                        className="mt-4 px-0"
-                        onClick={() => setEditing(s)}
-                      >
-                        Configurar
-                      </Button>
-                    </TableCell>
-                  )}
+      <Card asChild className="block gap-0">
+        <section className="panel">
+          <Input
+            className="search"
+            aria-label="Buscar saldo"
+            placeholder="Buscar material"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="table-scroll">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Material / obra</TableHead>
+                  <TableHead>Localização</TableHead>
+                  <TableHead>Disponível</TableHead>
+                  <TableHead>Mínimo / ideal</TableHead>
+                  <TableHead>Custo médio</TableHead>
+                  <TableHead>Situação</TableHead>
+                  {canEdit && <TableHead>Ações</TableHead>}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        {!rows.length && (
-          <EmptyState>
-            Nenhum saldo encontrado. Registre uma entrada ou configure o
-            material neste local.
-          </EmptyState>
-        )}
-      </section>
+              </TableHeader>
+              <TableBody>
+                {rows.map((s) => (
+                  <TableRow key={s.id}>
+                    <TableCell>
+                      <strong>{s.material.name}</strong>
+                      <small>{s.location.name}</small>
+                    </TableCell>
+                    <TableCell>{s.address || 'A definir'}</TableCell>
+                    <TableCell>
+                      {number(s.quantity)} {s.material.unit.code}
+                    </TableCell>
+                    <TableCell>
+                      {number(s.minimum)} / {number(s.ideal)}
+                    </TableCell>
+                    <TableCell>{money(s.averageCost)}</TableCell>
+                    <TableCell>
+                      <Badge
+                        tone={
+                          toMilliunits(s.quantity) < toMilliunits(s.minimum)
+                            ? 'warning'
+                            : 'success'
+                        }
+                      >
+                        {toMilliunits(s.quantity) < toMilliunits(s.minimum)
+                          ? 'Abaixo do mínimo'
+                          : 'Regular'}
+                      </Badge>
+                    </TableCell>
+                    {canEdit && (
+                      <TableCell>
+                        <Button
+                          variant="link"
+                          className="mt-4 px-0"
+                          onClick={() => setEditing(s)}
+                        >
+                          Configurar
+                        </Button>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          {!rows.length && (
+            <EmptyState>
+              Nenhum saldo encontrado. Registre uma entrada ou configure o
+              material neste local.
+            </EmptyState>
+          )}
+        </section>
+      </Card>
     </>
   );
 }
